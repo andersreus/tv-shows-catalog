@@ -1,7 +1,17 @@
 {
   "Deploy": {
     "Project": {
-      "Workspaces": []
+      "Name": "tv shows catalog",
+      "Alias": "tv-shows-catalog",
+      "Id": "5fab6e44-3480-4979-b0ba-c5f7b2600c0e",
+      "Workspaces": [
+        {
+          "Id": "4a6116f7-03d1-4de8-afef-d51251c8d6c5",
+          "Name": "Live",
+          "Type": "live",
+          "Url": "https://tv-shows-catalog.euwest01.umbraco.io"
+        }
+      ]
     },
     "Settings": {}
   },
