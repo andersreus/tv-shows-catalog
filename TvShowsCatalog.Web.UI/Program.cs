@@ -1,3 +1,5 @@
+using TvShowsCatalog.Web.Services;
+
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.CreateUmbracoBuilder()

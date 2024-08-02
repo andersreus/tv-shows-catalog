@@ -1,0 +1,25 @@
+{
+  "Name": "TV Shows",
+  "Alias": "tvShows",
+  "AllowedTemplates": [],
+  "HistoryCleanup": {},
+  "Icon": "icon-document",
+  "Thumbnail": "folder.png",
+  "Permissions": {
+    "AllowedAtRoot": true,
+    "AllowedChildContentTypes": [
+      "umb://document-type/e7139c5ce01b4f36acf83f1c1ef18361"
+    ]
+  },
+  "CompositionContentTypes": [],
+  "PropertyGroups": [],
+  "PropertyTypes": [],
+  "Udi": "umb://document-type/889800e5b82f44c9ae657ca89636964c",
+  "Dependencies": [
+    {
+      "Udi": "umb://document-type/e7139c5ce01b4f36acf83f1c1ef18361"
+    }
+  ],
+  "__type": "Umbraco.Deploy.Infrastructure,Umbraco.Deploy.Infrastructure.Artifacts.ContentType.DocumentTypeArtifact",
+  "__version": "14.0.2"
+}
