@@ -13,6 +13,7 @@ namespace TvShowsCatalog.Web.Services
     {
         public async Task<IEnumerable<TvMazeModel>> GetAllAsync()
         {
+            // TODO: Get all tv shows. No pagination. But wait until the end to pull all 60k tvshows.
             // Error handling, try catch?
             var request = new HttpRequestMessage(HttpMethod.Get, "https://api.tvmaze.com/shows?page=0");
 

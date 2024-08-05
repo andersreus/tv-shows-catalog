@@ -8,7 +8,7 @@ namespace TvShowsCatalog.Web.UI
         // Increase to 60 minutes when ImportContentService is done
         public TimeSpan Period { get => TimeSpan.FromMinutes(1); }
 
-        TimeSpan Delay = TimeSpan.FromSeconds(5);
+        TimeSpan Delay = TimeSpan.FromSeconds(1);
 
         // By default the job is only running on one server. So no need for configuring serverroles.
 
@@ -24,11 +24,7 @@ namespace TvShowsCatalog.Web.UI
 
         public async Task RunJobAsync()
         {
-            // Call importcontent, pass in the unique identifier for the contenttype (parentId used in the IContentService create method)
-            // Right now parentKey is hardcorded to -1 to insert all content as rootnodes.
-
-            // TODO: Do logic that checks if there is content already and if it needs to be updated. This will live in the ImportContentService, check that
-            await _importContentService.ImportContentAsync(-1);
+            _importContentService.ShouldRunImport();
         }
     }
 }

@@ -8,8 +8,8 @@ namespace TvShowsCatalog.Web.UI
     //    public void Compose(IUmbracoBuilder builder)
     //    {
     //        builder.Services.AddRecurringBackgroundJob<ContentImportFromMaze>();
-    //        builder.Services.AddTransient<IImportContentService,ImportContentService>();
-    //        builder.Services.AddTransient<ITvMazeService,TvMazeService>();
+    //        builder.Services.AddTransient<IImportContentService, ImportContentService>();
+    //        builder.Services.AddTransient<ITvMazeService, TvMazeService>();
     //    }
     //}
 }

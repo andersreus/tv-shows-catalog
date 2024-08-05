@@ -1,4 +1,5 @@
-﻿using TvShowsCatalog.Web.Models.ApiModels;
+﻿using System.ComponentModel;
+using TvShowsCatalog.Web.Models.ApiModels;
 using Umbraco.Cms.Core.Services;
 
 namespace TvShowsCatalog.Web.Services
@@ -14,10 +15,10 @@ namespace TvShowsCatalog.Web.Services
             _tvMazeService = tVMazeService;
 
         }
-        // TODO: bool ShouldRunImport method? If yes, import all or new tv shows that has been added since last time.
-        // TODO: Task<IEnumerable<TvMazeModel>> UpdateImportedContent? In case there is new tv shows added.
 
-        public async Task<IEnumerable<TvMazeModel>> ImportContentAsync(int parentKey)
+        // TODO: Task<IEnumerable<TvMazeModel>> UpdateImportedContent? In case there is new tv shows added to the list since the last import.
+
+        public async Task<IEnumerable<TvMazeModel>> ImportContentAsync(int rootContentId)
         {
             var allTvShows = await _tvMazeService.GetAllAsync();
 
@@ -28,14 +29,29 @@ namespace TvShowsCatalog.Web.Services
                 // TODO: Use publishedcontent instead, it's more efficient.
                 // contentservice goes to the database, publishedcontent will use the cache.
 
-                // TODO: Check if content is already imported. This should not matter if I use Hangfire as Tony mentioned tho. Then it will just update on every hour instead.
-                var tvshow = _contentService.Create($"{show.Name}", parentKey, "tVShow");
+                var tvshow = _contentService.Create($"{show.Name}", rootContentId, "tVShow");
 
                 _contentService.Save(tvshow);
                 _contentService.Publish(tvshow, cultures);
             }
 
             return allTvShows;
+        }
+
+        public async Task<bool> ShouldRunImport()
+        {
+            var rootContent = _contentService.GetRootContent().FirstOrDefault();
+
+            // TODO add null check
+            var rootContentId = rootContent.Id;
+            
+            bool isThereContent = _contentService.HasChildren(rootContentId);
+
+            if (!isThereContent)
+            {
+                await ImportContentAsync(rootContentId);
+            }
+            return isThereContent;
         }
     }
 }
