@@ -17,7 +17,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Files", "Solution 
 		TvShowsCatalog.Web.UI\umbraco-cloud.json = TvShowsCatalog.Web.UI\umbraco-cloud.json
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TvShowsCatalog.Web", "TvShowsCatalog.Web\TvShowsCatalog.Web.csproj", "{CA1857BC-BCD3-49DE-93E0-FD65854BB241}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TvShowsCatalog.Web", "TvShowsCatalog.Web\TvShowsCatalog.Web.csproj", "{CA1857BC-BCD3-49DE-93E0-FD65854BB241}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TvShowsCatalog.Tests", "TvShowsCatalog.Tests\TvShowsCatalog.Tests.csproj", "{FB438BBE-2175-4694-9130-C03D3EFDDB13}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,8 +35,15 @@ Global
 		{CA1857BC-BCD3-49DE-93E0-FD65854BB241}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CA1857BC-BCD3-49DE-93E0-FD65854BB241}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CA1857BC-BCD3-49DE-93E0-FD65854BB241}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FB438BBE-2175-4694-9130-C03D3EFDDB13}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB438BBE-2175-4694-9130-C03D3EFDDB13}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FB438BBE-2175-4694-9130-C03D3EFDDB13}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FB438BBE-2175-4694-9130-C03D3EFDDB13}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D479636C-3CBB-41B2-A149-98564B7D0060}
 	EndGlobalSection
 EndGlobal

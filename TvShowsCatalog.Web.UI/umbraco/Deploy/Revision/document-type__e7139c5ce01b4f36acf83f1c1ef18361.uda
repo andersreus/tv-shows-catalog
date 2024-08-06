@@ -21,6 +21,20 @@
           "DataType": "umb://data-type/0cc0eba1996042c9bf9b60e150b429ae",
           "Description": "The name of the tv show",
           "Name": "Show name"
+        },
+        {
+          "Key": "3373f0fe-4baa-4258-8e35-e1013d32dc0d",
+          "Alias": "showSummary",
+          "DataType": "umb://data-type/ca90c9500aff4e72b976a30b1ac57dad",
+          "Name": "Show summary",
+          "SortOrder": 1
+        },
+        {
+          "Key": "ace59fd7-ba5f-440a-9850-9a24afde1f91",
+          "Alias": "showImage",
+          "DataType": "umb://data-type/ad9f0cf2bda245d59ea1a63cfc873fd3",
+          "Name": "Show image",
+          "SortOrder": 2
         }
       ]
     }
@@ -30,6 +44,14 @@
   "Dependencies": [
     {
       "Udi": "umb://data-type/0cc0eba1996042c9bf9b60e150b429ae",
+      "Ordering": true
+    },
+    {
+      "Udi": "umb://data-type/ad9f0cf2bda245d59ea1a63cfc873fd3",
+      "Ordering": true
+    },
+    {
+      "Udi": "umb://data-type/ca90c9500aff4e72b976a30b1ac57dad",
       "Ordering": true
     }
   ],

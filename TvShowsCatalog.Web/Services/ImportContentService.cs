@@ -17,6 +17,7 @@ namespace TvShowsCatalog.Web.Services
         }
 
         // TODO: Task<IEnumerable<TvMazeModel>> UpdateImportedContent? In case there is new tv shows added to the list since the last import.
+        // TODO: For creating media in Umbraco via code, use the Media Service
 
         public async Task<IEnumerable<TvMazeModel>> ImportContentAsync(int rootContentId)
         {
