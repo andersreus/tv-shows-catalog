@@ -26,7 +26,7 @@ namespace TvShowsCatalog.Web.UI
         {
             if (!await _importContentService.ShouldRunImport())
             {
-				await _importContentService.ImportContentAsync(1779);
+				await _importContentService.ImportContentAsync(1058);
 			}
         }
     }
