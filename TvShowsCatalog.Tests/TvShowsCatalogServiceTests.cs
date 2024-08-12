@@ -1,29 +1,73 @@
-using Microsoft.Extensions.DependencyInjection;
-using System.ComponentModel.DataAnnotations;
 using TvShowsCatalog.Web.Services;
-using Umbraco.Cms.Core.DeliveryApi;
+using Umbraco.Cms.Core.Models;
+using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Tests.Common.Testing;
 using Umbraco.Cms.Tests.Integration.Testing;
+using Umbraco.Cms.Core;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace TvShowsCatalog.Tests
 {
-    [TestFixture]
-    [UmbracoTest(Database = UmbracoTestOptions.Database.NewSchemaPerTest)]
-    public class TvShowsCatalogServiceTests : UmbracoIntegrationTest
-    {
-        private ITvMazeService _tvMazeService;
+	[TestFixture]
+	[UmbracoTest(Database = UmbracoTestOptions.Database.NewSchemaPerTest)]
+	public class TvShowsCatalogServiceTests : UmbracoIntegrationTest
+	{
+		private ITvMazeService _tvMazeService;
+		private IMediaService _mediaService;
+		private IImportMediaService _importMediaService;
 
-        [SetUp]
-        public void Setup()
-        {
-            _tvMazeService = new TvMazeService();
-        }
+		[SetUp]
+		public void Setup()
+		{
+			_mediaService = GetRequiredService<IMediaService>();
+			_tvMazeService = GetRequiredService<ITvMazeService>();
+			_importMediaService = GetRequiredService<IImportMediaService>();
+		}
 
-        [Test]
-        public async Task GetAllAsync_ReturnsListOfTvMazeModelObjects()
-        {
-            var allShows = await _tvMazeService.GetAllAsync();
-            Assert.IsTrue(allShows.Any());
-        }
-    }
+		protected override void CustomTestSetup(IUmbracoBuilder builder)
+		{
+			builder.Services.AddTransient<ITvMazeService, TvMazeService>();
+			builder.Services.AddTransient<IImportMediaService, ImportMediaService>();
+		}
+
+		[Test]
+		public async Task GetAllAsync_ReturnsListOfTvMazeModelObjects()
+		{
+			var allShows = await _tvMazeService.GetAllAsync();
+			Assert.IsTrue(allShows.Any());
+		}
+
+		[Test]
+		public async Task ImportMediaAsync_CreateAndSafeASingleMediaInBackoffice()
+		{
+			// For the first media item
+
+			var allShows = await _tvMazeService.GetAllAsync();
+
+			var media =  await _importMediaService.ImportMediaAsync(allShows.First());
+
+			var savedMedia = _mediaService.GetById(media.Id);
+
+			Assert.IsNotNull(savedMedia);
+		}
+
+		[Test]
+		public async Task ImportMediaAsync_CreateAndSafeAllMediaInBackoffice()
+		{
+			// All media items for the first page of tvshows (240)
+
+			var allShows = await _tvMazeService.GetAllAsync();
+
+			var mediaFolder = _importMediaService.CreateMediaRootFolder();
+
+			foreach (var show in allShows)
+			{
+				var savedMedia = await _importMediaService.ImportMediaAsync(show);
+			}
+
+			int count = _mediaService.CountChildren(mediaFolder.Id);
+
+			Assert.AreEqual(240, count);
+		}
+	}
 }

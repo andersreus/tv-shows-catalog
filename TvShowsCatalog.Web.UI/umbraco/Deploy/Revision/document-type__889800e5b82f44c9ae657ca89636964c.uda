@@ -1,7 +1,10 @@
 {
   "Name": "TV Shows",
   "Alias": "tvShows",
-  "AllowedTemplates": [],
+  "DefaultTemplate": "umb://template/2195738793ae462f983803f65bfe9d43",
+  "AllowedTemplates": [
+    "umb://template/2195738793ae462f983803f65bfe9d43"
+  ],
   "HistoryCleanup": {},
   "Icon": "icon-document",
   "Thumbnail": "folder.png",
@@ -18,6 +21,10 @@
   "Dependencies": [
     {
       "Udi": "umb://document-type/e7139c5ce01b4f36acf83f1c1ef18361"
+    },
+    {
+      "Udi": "umb://template/2195738793ae462f983803f65bfe9d43",
+      "Ordering": true
     }
   ],
   "__type": "Umbraco.Deploy.Infrastructure,Umbraco.Deploy.Infrastructure.Artifacts.ContentType.DocumentTypeArtifact",

@@ -1,0 +1,22 @@
+﻿@using Umbraco.Cms.Web.Common.PublishedModels;
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@{
+	Layout = null;
+}
+
+
+@{
+	var tvshows = Umbraco.ContentAtRoot().FirstOrDefault()
+    .Children()
+    .Where(x => x.IsVisible())
+    .OrderBy(x => x.Name);
+}
+<ul>
+	@foreach (var item in tvshows)
+	{
+		<li>
+			<p>@item.Name</p>
+		</li>
+	}
+</ul>
+

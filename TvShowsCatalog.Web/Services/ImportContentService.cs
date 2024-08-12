@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel;
 using TvShowsCatalog.Web.Models.ApiModels;
+using Umbraco.Cms.Core.Models;
+using Umbraco.Cms.Core.Scoping;
 using Umbraco.Cms.Core.Services;
 
 namespace TvShowsCatalog.Web.Services
@@ -8,13 +10,16 @@ namespace TvShowsCatalog.Web.Services
     {
         private readonly IContentService _contentService;
         private readonly ITvMazeService _tvMazeService;
+        private readonly IImportMediaService _importMediaService;
+        private readonly ICoreScopeProvider _coreScopeProvider;
 
-        public ImportContentService(IContentService contentService, ITvMazeService tVMazeService)
+        public ImportContentService(IContentService contentService, ITvMazeService tVMazeService, IImportMediaService importMediaService, ICoreScopeProvider coreScopeProvider)
         {
             _contentService = contentService;
             _tvMazeService = tVMazeService;
-
-        }
+            _importMediaService = importMediaService;
+            _coreScopeProvider = coreScopeProvider;
+		}
 
         // TODO: Task<IEnumerable<TvMazeModel>> UpdateImportedContent? In case there is new tv shows added to the list since the last import.
         // TODO: For creating media in Umbraco via code, use the Media Service
@@ -25,18 +30,24 @@ namespace TvShowsCatalog.Web.Services
 
             var cultures = Array.Empty<string>();
 
-            foreach (var show in allTvShows)
+			using ICoreScope scope = _coreScopeProvider.CreateCoreScope();
+			foreach (var show in allTvShows)
             {
-                // TODO: Use publishedcontent instead, it's more efficient.
-                // contentservice goes to the database, publishedcontent will use the cache.
-
+				// TODO: Use publishedcontent instead, it's more efficient.
+				// contentservice goes to the database, publishedcontent will use the cache.
+				using (ExecutionContext.SuppressFlow())
+                {
+					var media = _importMediaService.ImportMediaAsync(show);
+				}
                 var tvshow = _contentService.Create($"{show.Name}", rootContentId, "tVShow");
+                tvshow.SetValue("showSummary", $"{show.Summary}");
 
-                _contentService.Save(tvshow);
+				_contentService.Save(tvshow);
                 _contentService.Publish(tvshow, cultures);
-            }
-
-            return allTvShows;
+				
+			}
+			scope.Complete();
+			return allTvShows;
         }
 
         public async Task<bool> ShouldRunImport()
@@ -48,10 +59,6 @@ namespace TvShowsCatalog.Web.Services
             
             bool isThereContent = _contentService.HasChildren(rootContentId);
 
-            if (!isThereContent)
-            {
-                await ImportContentAsync(rootContentId);
-            }
             return isThereContent;
         }
     }

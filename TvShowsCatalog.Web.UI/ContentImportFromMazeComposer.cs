@@ -1,4 +1,5 @@
-﻿using TvShowsCatalog.Web.Services;
+﻿using Serilog.Core;
+using TvShowsCatalog.Web.Services;
 using Umbraco.Cms.Core.Composing;
 
 namespace TvShowsCatalog.Web.UI
@@ -10,6 +11,7 @@ namespace TvShowsCatalog.Web.UI
     //        builder.Services.AddRecurringBackgroundJob<ContentImportFromMaze>();
     //        builder.Services.AddTransient<IImportContentService, ImportContentService>();
     //        builder.Services.AddTransient<ITvMazeService, TvMazeService>();
+    //        builder.Services.AddTransient<IImportMediaService, ImportMediaService>();
     //    }
     //}
 }

@@ -8,10 +8,11 @@ using Umbraco.Cms.Core.Models;
 
 namespace TvShowsCatalog.Web.Services
 {
-    public interface IImportContentService
-    {
-        Task<IEnumerable<TvMazeModel>> ImportContentAsync(int parentKey);
-        Task<bool> ShouldRunImport();
+	public interface IImportMediaService
+	{
+		IMedia CreateMediaRootFolder();
+		Task<IMedia> ImportMediaAsync(TvMazeModel tvshow);
 
+		string GetImageFileFormat(string url);
 	}
 }
