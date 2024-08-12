@@ -1,14 +1,8 @@
 {
   "Name": "TV Shows",
   "Alias": "tvShows",
-  "File": "umb://template-file/tvShows.cshtml",
   "Udi": "umb://template/2195738793ae462f983803f65bfe9d43",
-  "Dependencies": [
-    {
-      "Udi": "umb://template-file/tvShows.cshtml",
-      "Ordering": true
-    }
-  ],
+  "Dependencies": [],
   "__type": "Umbraco.Deploy.Infrastructure,Umbraco.Deploy.Infrastructure.Artifacts.TemplateArtifact",
   "__version": "14.0.2"
 }
