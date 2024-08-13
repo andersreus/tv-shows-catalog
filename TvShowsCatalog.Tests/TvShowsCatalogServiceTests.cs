@@ -38,10 +38,8 @@ namespace TvShowsCatalog.Tests
 		}
 
 		[Test]
-		public async Task ImportMediaAsync_CreateAndSafeASingleMediaInBackoffice()
+		public async Task ImportMedia_CreateAndSafeASingleMediaInBackoffice()
 		{
-			// For the first media item
-
 			var allShows = await _tvMazeService.GetAllAsync();
 
 			var media =  await _importMediaService.ImportMediaAsync(allShows.First());
@@ -52,10 +50,8 @@ namespace TvShowsCatalog.Tests
 		}
 
 		[Test]
-		public void ImportMediaAsync_CreateAndSafeAllMediaInBackoffice()
+		public void ImportBulkMedia_CreateAndSafeAllMediaInBackoffice()
 		{
-			// All media items for the first page of tvshows (240)
-
 			var allShows = _tvMazeService.GetAllAsync().GetAwaiter().GetResult();
 
 			var mediaFolder = _importMediaService.CreateMediaRootFolder();
@@ -65,6 +61,12 @@ namespace TvShowsCatalog.Tests
 			int count = _mediaService.CountChildren(mediaFolder.Id);
 
 			Assert.AreEqual(240, count);
+		}
+
+		[Test]
+		public void ImportContent_CreateAndSafeAllTvShowsAsNodesInBackoffice()
+		{
+			throw new NotImplementedException();
 		}
 	}
 }

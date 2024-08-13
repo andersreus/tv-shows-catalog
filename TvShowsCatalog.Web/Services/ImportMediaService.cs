@@ -82,7 +82,7 @@ namespace TvShowsCatalog.Web.Services
 						var media = _mediaService.CreateMedia(fileName, mediaFolder.Id, Constants.Conventions.MediaTypes.Image);
 						media.SetValue(_mediaFileManager, _mediaUrlGeneratorCollection, _shortStringHelper, _contentTypeBaseServiceProvider, Constants.Conventions.Media.File, fileName, stream);
 
-						_mediaService.Save(media); // BREAKS HERE AGAIN...
+						_mediaService.Save(media);
 						scope.Complete();
 
 						return media;
@@ -98,7 +98,6 @@ namespace TvShowsCatalog.Web.Services
 
 		public string GetImageFileFormat(string url)
 		{
-			// Path.GetExtension should return the fileformat including the "."
 			var fileFormat = Path.GetExtension(url);
 			return fileFormat;
 		}
@@ -109,7 +108,6 @@ namespace TvShowsCatalog.Web.Services
 			List<IMedia> media = new List<IMedia>();
 			foreach (var show in tvshows)
 			{
-				// yield return = create list, add to list and return list
 				var image = ImportMediaAsync(show).GetAwaiter().GetResult();
 				media.Add(image);
 			}

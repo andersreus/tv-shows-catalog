@@ -21,10 +21,19 @@ namespace TvShowsCatalog.Web.Services
             _coreScopeProvider = coreScopeProvider;
 		}
 
-        // TODO: Task<IEnumerable<TvMazeModel>> UpdateImportedContent? In case there is new tv shows added to the list since the last import.
-        // TODO: For creating media in Umbraco via code, use the Media Service
+		public void CreateContent(TvMazeModel tvshow, int rootContentId, string[] cultures)
+		{
+			var node = _contentService.Create($"{tvshow.Name}", rootContentId, "tVShow");
+			node.SetValue("showSummary", $"{tvshow.Summary}");
+			// SetValue -> mediapicker image
 
-        public IEnumerable<TvMazeModel> ImportContent(int rootContentId)
+			_contentService.Save(node);
+			_contentService.Publish(node, cultures);
+		}
+
+		// TODO: Check for updated/added tvshows?
+
+		public IEnumerable<TvMazeModel> ImportContent(int rootContentId)
         {
             var allTvShows = _tvMazeService.GetAllAsync().GetAwaiter().GetResult();
             var cultures = Array.Empty<string>();
@@ -33,17 +42,10 @@ namespace TvShowsCatalog.Web.Services
             _importMediaService.ImportBulkMedia(allTvShows);
 			foreach (var show in allTvShows)
             {
-				// TODO: Use publishedcontent instead, it's more efficient.
-				// contentservice goes to the database, publishedcontent will use the cache.
-                var tvshow = _contentService.Create($"{show.Name}", rootContentId, "tVShow");
-                tvshow.SetValue("showSummary", $"{show.Summary}");
-                // SetValue -> mediapicker image
-
-				_contentService.Save(tvshow);
-                _contentService.Publish(tvshow, cultures);
-                
+                CreateContent(show, rootContentId, cultures);
 			}
 			scope.Complete();
+
 			return allTvShows;
         }
 
