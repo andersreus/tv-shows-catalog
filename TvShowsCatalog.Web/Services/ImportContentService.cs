@@ -50,16 +50,22 @@ namespace TvShowsCatalog.Web.Services
 			return allTvShows;
         }
 
-        public async Task<bool> ShouldRunImport()
+        // Refactor. I need that rootContentId to be passed back to the ContentImportFromMaze class..
+        // C# Tubles??
+        // Should this method be async?
+        public async Task<(bool, int)> ShouldRunImportAsync()
         {
             var rootContent = _contentService.GetRootContent().FirstOrDefault();
 
-            // TODO add null check
+            if (rootContent == null)
+            {
+                throw new Exception("Root content node was not found");
+            }
             var rootContentId = rootContent.Id;
             
             bool isThereContent = _contentService.HasChildren(rootContentId);
 
-            return isThereContent;
+            return (isThereContent,rootContentId);
         }
     }
 }

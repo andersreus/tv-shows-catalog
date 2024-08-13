@@ -8,7 +8,7 @@ namespace TvShowsCatalog.Web.UI
         // Increase to 60 minutes when ImportContentService is done
         public TimeSpan Period { get => TimeSpan.FromMinutes(60); }
 
-        TimeSpan Delay = TimeSpan.FromSeconds(10);
+        TimeSpan Delay = TimeSpan.FromSeconds(1);
 
         // By default the job is only running on one server. So no need for configuring serverroles.
 
@@ -24,9 +24,13 @@ namespace TvShowsCatalog.Web.UI
 
         public async Task RunJobAsync()
         {
-            if (!await _importContentService.ShouldRunImport())
+			// Call the ShouldRunImportAsync method and when the task complete, create a tuble containing both a boolean (shouldRunImport) and a integer (rootContentId).
+			// Using the tuble feature I can then seperate them into two standalone variables. Which makes it possible to both check the boolean but also pass on the rootContentId via the ImportContentAsync method.
+			var (shouldRunImport, rootContentId) = await _importContentService.ShouldRunImportAsync();
+
+            if (!shouldRunImport)
             {
-				await _importContentService.ImportContentAsync(1058);
+				await _importContentService.ImportContentAsync(rootContentId);
 			}
         }
     }

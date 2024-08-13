@@ -82,7 +82,7 @@ namespace TvShowsCatalog.Web.Services
 							var media = _mediaService.CreateMedia(fileName, mediaFolder.Id, Constants.Conventions.MediaTypes.Image);
 							media.SetValue(_mediaFileManager, _mediaUrlGeneratorCollection, _shortStringHelper, _contentTypeBaseServiceProvider, Constants.Conventions.Media.File, fileName, stream);
 
-							_mediaService.Save(media);
+							_mediaService.Save(media); // BREAKS HERE AGAIN...
 							scope.Complete();
 
 							return media;
