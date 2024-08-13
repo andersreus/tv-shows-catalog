@@ -5,14 +5,10 @@ namespace TvShowsCatalog.Web.UI
 {
     public class ContentImportFromMaze : IRecurringBackgroundJob
     {
-        // Increase to 60 minutes when ImportContentService is done
         public TimeSpan Period { get => TimeSpan.FromMinutes(60); }
 
         TimeSpan Delay = TimeSpan.FromSeconds(1);
 
-        // By default the job is only running on one server. So no need for configuring serverroles.
-
-        // No-op event as the period never changes on this job
         public event EventHandler PeriodChanged { add { } remove { } }
 
         private readonly IImportContentService _importContentService;
@@ -24,13 +20,12 @@ namespace TvShowsCatalog.Web.UI
 
         public async Task RunJobAsync()
         {
-			// Call the ShouldRunImportAsync method and when the task complete, create a tuble containing both a boolean (shouldRunImport) and a integer (rootContentId).
-			// Using the tuble feature I can then seperate them into two standalone variables. Which makes it possible to both check the boolean but also pass on the rootContentId via the ImportContentAsync method.
-			var (shouldRunImport, rootContentId) = await _importContentService.ShouldRunImportAsync();
+            // TODO: tuple = bad practice. Rethink
+			var (shouldRunImport, rootContentId) = _importContentService.ShouldRunImport();
 
             if (!shouldRunImport)
             {
-				await _importContentService.ImportContentAsync(rootContentId);
+				_importContentService.ImportContent(rootContentId);
 			}
         }
     }

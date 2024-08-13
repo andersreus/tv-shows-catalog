@@ -10,8 +10,7 @@ namespace TvShowsCatalog.Web.Services
 {
     public interface IImportContentService
     {
-        Task<IEnumerable<TvMazeModel>> ImportContentAsync(int parentKey);
-        Task<(bool, int)> ShouldRunImportAsync();
-
+        IEnumerable<TvMazeModel> ImportContent(int parentKey);
+        (bool, int) ShouldRunImport();
 	}
 }

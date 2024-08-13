@@ -24,36 +24,30 @@ namespace TvShowsCatalog.Web.Services
         // TODO: Task<IEnumerable<TvMazeModel>> UpdateImportedContent? In case there is new tv shows added to the list since the last import.
         // TODO: For creating media in Umbraco via code, use the Media Service
 
-        public async Task<IEnumerable<TvMazeModel>> ImportContentAsync(int rootContentId)
+        public IEnumerable<TvMazeModel> ImportContent(int rootContentId)
         {
-            var allTvShows = await _tvMazeService.GetAllAsync();
-
+            var allTvShows = _tvMazeService.GetAllAsync().GetAwaiter().GetResult();
             var cultures = Array.Empty<string>();
 
 			using ICoreScope scope = _coreScopeProvider.CreateCoreScope();
+            _importMediaService.ImportBulkMedia(allTvShows);
 			foreach (var show in allTvShows)
             {
 				// TODO: Use publishedcontent instead, it's more efficient.
 				// contentservice goes to the database, publishedcontent will use the cache.
-				using (ExecutionContext.SuppressFlow())
-                {
-					var media = _importMediaService.ImportMediaAsync(show);
-				}
                 var tvshow = _contentService.Create($"{show.Name}", rootContentId, "tVShow");
                 tvshow.SetValue("showSummary", $"{show.Summary}");
+                // SetValue -> mediapicker image
 
 				_contentService.Save(tvshow);
                 _contentService.Publish(tvshow, cultures);
-				
+                
 			}
 			scope.Complete();
 			return allTvShows;
         }
 
-        // Refactor. I need that rootContentId to be passed back to the ContentImportFromMaze class..
-        // C# Tubles??
-        // Should this method be async?
-        public async Task<(bool, int)> ShouldRunImportAsync()
+        public (bool, int) ShouldRunImport()
         {
             var rootContent = _contentService.GetRootContent().FirstOrDefault();
 

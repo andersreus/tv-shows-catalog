@@ -52,18 +52,15 @@ namespace TvShowsCatalog.Tests
 		}
 
 		[Test]
-		public async Task ImportMediaAsync_CreateAndSafeAllMediaInBackoffice()
+		public void ImportMediaAsync_CreateAndSafeAllMediaInBackoffice()
 		{
 			// All media items for the first page of tvshows (240)
 
-			var allShows = await _tvMazeService.GetAllAsync();
+			var allShows = _tvMazeService.GetAllAsync().GetAwaiter().GetResult();
 
 			var mediaFolder = _importMediaService.CreateMediaRootFolder();
 
-			foreach (var show in allShows)
-			{
-				var savedMedia = await _importMediaService.ImportMediaAsync(show);
-			}
+			_importMediaService.ImportBulkMedia(allShows);
 
 			int count = _mediaService.CountChildren(mediaFolder.Id);
 

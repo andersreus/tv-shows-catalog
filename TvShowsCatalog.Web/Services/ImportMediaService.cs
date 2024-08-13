@@ -78,14 +78,14 @@ namespace TvShowsCatalog.Web.Services
 
 					using (var stream = await response.Content.ReadAsStreamAsync())
 					{
-							using ICoreScope scope = _coreScopeProvider.CreateCoreScope();
-							var media = _mediaService.CreateMedia(fileName, mediaFolder.Id, Constants.Conventions.MediaTypes.Image);
-							media.SetValue(_mediaFileManager, _mediaUrlGeneratorCollection, _shortStringHelper, _contentTypeBaseServiceProvider, Constants.Conventions.Media.File, fileName, stream);
+						using ICoreScope scope = _coreScopeProvider.CreateCoreScope();
+						var media = _mediaService.CreateMedia(fileName, mediaFolder.Id, Constants.Conventions.MediaTypes.Image);
+						media.SetValue(_mediaFileManager, _mediaUrlGeneratorCollection, _shortStringHelper, _contentTypeBaseServiceProvider, Constants.Conventions.Media.File, fileName, stream);
 
-							_mediaService.Save(media); // BREAKS HERE AGAIN...
-							scope.Complete();
+						_mediaService.Save(media); // BREAKS HERE AGAIN...
+						scope.Complete();
 
-							return media;
+						return media;
 					}
 				}
 			}
@@ -101,6 +101,20 @@ namespace TvShowsCatalog.Web.Services
 			// Path.GetExtension should return the fileformat including the "."
 			var fileFormat = Path.GetExtension(url);
 			return fileFormat;
+		}
+
+		public IEnumerable<IMedia> ImportBulkMedia(IEnumerable<TvMazeModel> tvshows)
+		{
+			using ICoreScope scope = _coreScopeProvider.CreateCoreScope();
+			List<IMedia> media = new List<IMedia>();
+			foreach (var show in tvshows)
+			{
+				// yield return = create list, add to list and return list
+				var image = ImportMediaAsync(show).GetAwaiter().GetResult();
+				media.Add(image);
+			}
+			scope.Complete();
+			return media;
 		}
 	}
 }

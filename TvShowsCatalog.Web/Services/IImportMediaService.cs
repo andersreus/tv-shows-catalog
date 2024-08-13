@@ -12,7 +12,7 @@ namespace TvShowsCatalog.Web.Services
 	{
 		IMedia CreateMediaRootFolder();
 		Task<IMedia> ImportMediaAsync(TvMazeModel tvshow);
-
+		IEnumerable<IMedia> ImportBulkMedia(IEnumerable<TvMazeModel> tvshows);
 		string GetImageFileFormat(string url);
 	}
 }
