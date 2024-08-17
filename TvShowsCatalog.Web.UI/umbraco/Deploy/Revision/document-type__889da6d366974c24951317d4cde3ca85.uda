@@ -1,0 +1,47 @@
+{
+  "Name": "Footer Properties",
+  "Alias": "footerProperties",
+  "AllowedTemplates": [],
+  "HistoryCleanup": {},
+  "Icon": "icon-plugin color-red",
+  "Thumbnail": "folder.png",
+  "Permissions": {
+    "IsElementType": true,
+    "AllowedChildContentTypes": []
+  },
+  "Parent": "umb://document-type-container/f19e8c1006f6499fbef1c7ff0c74641d",
+  "CompositionContentTypes": [],
+  "PropertyGroups": [
+    {
+      "Key": "cff95481-bb83-4345-a2e4-91d4cc0e7ce5",
+      "Name": "Footer",
+      "SortOrder": 50,
+      "Type": 1,
+      "Alias": "footer",
+      "PropertyTypes": [
+        {
+          "Key": "0f13d97b-9d60-4e07-873d-5d985ddbec70",
+          "Alias": "footerContent",
+          "DataType": "umb://data-type/f0bc4bfbb49940d6ba86058885a5178c",
+          "Description": "Footer content using Block Grid",
+          "Name": "Footer Content",
+          "SortOrder": 30
+        }
+      ]
+    }
+  ],
+  "PropertyTypes": [],
+  "Udi": "umb://document-type/889da6d366974c24951317d4cde3ca85",
+  "Dependencies": [
+    {
+      "Udi": "umb://data-type/f0bc4bfbb49940d6ba86058885a5178c",
+      "Ordering": true
+    },
+    {
+      "Udi": "umb://document-type-container/f19e8c1006f6499fbef1c7ff0c74641d",
+      "Ordering": true
+    }
+  ],
+  "__type": "Umbraco.Deploy.Infrastructure,Umbraco.Deploy.Infrastructure.Artifacts.ContentType.DocumentTypeArtifact",
+  "__version": "14.0.2"
+}

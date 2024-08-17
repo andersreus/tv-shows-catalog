@@ -1,13 +1,17 @@
 {
   "Name": "TV Show",
   "Alias": "tvShow",
-  "AllowedTemplates": [],
+  "DefaultTemplate": "umb://template/4aca1920b7cb4c1c884f86580239eac4",
+  "AllowedTemplates": [
+    "umb://template/4aca1920b7cb4c1c884f86580239eac4"
+  ],
   "HistoryCleanup": {},
-  "Icon": "icon-document",
+  "Icon": "icon-tv-old color-yellow",
   "Thumbnail": "folder.png",
   "Permissions": {
     "AllowedChildContentTypes": []
   },
+  "Parent": "umb://document-type-container/3026b6a90e864d27b8ef618db53a45fb",
   "CompositionContentTypes": [],
   "PropertyGroups": [
     {
@@ -21,6 +25,13 @@
           "DataType": "umb://data-type/ca90c9500aff4e72b976a30b1ac57dad",
           "Name": "Show Summary",
           "SortOrder": 1
+        },
+        {
+          "Key": "c6cd7283-5cf0-43ce-bf70-f9fba421c2c3",
+          "Alias": "showImage",
+          "DataType": "umb://data-type/ad9f0cf2bda245d59ea1a63cfc873fd3",
+          "Name": "Show Image",
+          "SortOrder": 2
         }
       ]
     }
@@ -29,7 +40,19 @@
   "Udi": "umb://document-type/e7139c5ce01b4f36acf83f1c1ef18361",
   "Dependencies": [
     {
+      "Udi": "umb://data-type/ad9f0cf2bda245d59ea1a63cfc873fd3",
+      "Ordering": true
+    },
+    {
       "Udi": "umb://data-type/ca90c9500aff4e72b976a30b1ac57dad",
+      "Ordering": true
+    },
+    {
+      "Udi": "umb://document-type-container/3026b6a90e864d27b8ef618db53a45fb",
+      "Ordering": true
+    },
+    {
+      "Udi": "umb://template/4aca1920b7cb4c1c884f86580239eac4",
       "Ordering": true
     }
   ],

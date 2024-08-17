@@ -1,0 +1,14 @@
+{
+  "Name": "Search Page",
+  "Alias": "searchPage",
+  "File": "umb://template-file/searchPage.cshtml",
+  "Udi": "umb://template/3b07095e29ea42e8a3bdc443724111fc",
+  "Dependencies": [
+    {
+      "Udi": "umb://template-file/searchPage.cshtml",
+      "Ordering": true
+    }
+  ],
+  "__type": "Umbraco.Deploy.Infrastructure,Umbraco.Deploy.Infrastructure.Artifacts.TemplateArtifact",
+  "__version": "14.0.2"
+}

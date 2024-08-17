@@ -1,0 +1,19 @@
+{
+  "Name": "Shows catalog",
+  "Alias": "showsCatalog",
+  "File": "umb://template-file/showsCatalog.cshtml",
+  "Master": "umb://template/de48e97a7f834dcf8d4a1c8a5fddf142",
+  "Udi": "umb://template/57c54d2d3cac4aa8917a699910197f28",
+  "Dependencies": [
+    {
+      "Udi": "umb://template-file/showsCatalog.cshtml",
+      "Ordering": true
+    },
+    {
+      "Udi": "umb://template/de48e97a7f834dcf8d4a1c8a5fddf142",
+      "Ordering": true
+    }
+  ],
+  "__type": "Umbraco.Deploy.Infrastructure,Umbraco.Deploy.Infrastructure.Artifacts.TemplateArtifact",
+  "__version": "14.0.2"
+}

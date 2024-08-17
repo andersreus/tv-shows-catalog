@@ -1,0 +1,25 @@
+﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@{
+	Layout = "main.cshtml";
+}
+
+@await Html.PartialAsync("header")
+
+@{
+	var selection = Umbraco.Content(Guid.Parse("c6b99edf-6e1b-4732-a216-a80c607fa041"))
+    .ChildrenOfType("tvShow")
+    .Where(x => x.IsVisible())
+    .OrderBy(x => x.Name);
+}
+<ul>
+	@foreach (var item in selection)
+	{
+		<li>
+			<a href="@item.Url()">@item.Name()</a>
+		</li>
+	}
+</ul>
+
+@await Html.PartialAsync("portfolio")
+@await Html.PartialAsync("about")
+@await Html.PartialAsync("contact")

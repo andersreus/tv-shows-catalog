@@ -25,6 +25,7 @@ namespace TvShowsCatalog.Web.UI
 
             if (!shouldRunImport)
             {
+                // Pass rootcontentId for tvshows node
 				_importContentService.ImportContent(rootContentId);
 			}
         }

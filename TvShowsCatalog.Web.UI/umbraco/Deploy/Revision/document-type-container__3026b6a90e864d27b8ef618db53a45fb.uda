@@ -1,0 +1,8 @@
+{
+  "Name": "Pages",
+  "ContainedObjectType": "a2cb7800-f571-4787-9638-bc48539a0efb",
+  "Udi": "umb://document-type-container/3026b6a90e864d27b8ef618db53a45fb",
+  "Dependencies": [],
+  "__type": "Umbraco.Deploy.Infrastructure,Umbraco.Deploy.Infrastructure.Artifacts.ContainerArtifact",
+  "__version": "14.0.2"
+}

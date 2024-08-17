@@ -1,0 +1,54 @@
+{
+  "Name": "Tagging Properties",
+  "Alias": "taggingProperties",
+  "AllowedTemplates": [],
+  "HistoryCleanup": {},
+  "Icon": "icon-plugin color-red",
+  "Thumbnail": "folder.png",
+  "Permissions": {
+    "IsElementType": true,
+    "AllowedChildContentTypes": []
+  },
+  "Parent": "umb://document-type-container/f19e8c1006f6499fbef1c7ff0c74641d",
+  "CompositionContentTypes": [],
+  "PropertyGroups": [
+    {
+      "Key": "6c7d3a1d-da8e-44df-a4a3-2cec00ef51de",
+      "Name": "Tagging",
+      "SortOrder": 10,
+      "Alias": "pageSettings/tagging",
+      "PropertyTypes": [
+        {
+          "Key": "4e332192-b48e-4a93-ae5f-6510d3023833",
+          "Alias": "pageTags",
+          "DataType": "umb://data-type/f0bc4bfbb49940d6ba86058885a5178c",
+          "Description": "Choose the tags for this page",
+          "Name": "Page Tags",
+          "SortOrder": 5
+        }
+      ]
+    },
+    {
+      "Key": "db38e288-e7a2-457b-8712-3ddc8eebe715",
+      "Name": "Page Settings",
+      "SortOrder": 60,
+      "Type": 1,
+      "Alias": "pageSettings",
+      "PropertyTypes": []
+    }
+  ],
+  "PropertyTypes": [],
+  "Udi": "umb://document-type/1eb0710df914413d9e63a46bfd732ccb",
+  "Dependencies": [
+    {
+      "Udi": "umb://data-type/f0bc4bfbb49940d6ba86058885a5178c",
+      "Ordering": true
+    },
+    {
+      "Udi": "umb://document-type-container/f19e8c1006f6499fbef1c7ff0c74641d",
+      "Ordering": true
+    }
+  ],
+  "__type": "Umbraco.Deploy.Infrastructure,Umbraco.Deploy.Infrastructure.Artifacts.ContentType.DocumentTypeArtifact",
+  "__version": "14.0.2"
+}

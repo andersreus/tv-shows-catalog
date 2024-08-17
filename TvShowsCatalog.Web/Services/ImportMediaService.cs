@@ -102,17 +102,22 @@ namespace TvShowsCatalog.Web.Services
 			return fileFormat;
 		}
 
-		public IEnumerable<IMedia> ImportBulkMedia(IEnumerable<TvMazeModel> tvshows)
-		{
-			using ICoreScope scope = _coreScopeProvider.CreateCoreScope();
-			List<IMedia> media = new List<IMedia>();
-			foreach (var show in tvshows)
-			{
-				var image = ImportMediaAsync(show).GetAwaiter().GetResult();
-				media.Add(image);
-			}
-			scope.Complete();
-			return media;
-		}
+		//public IEnumerable<IMedia> ImportBulkMedia(IEnumerable<TvMazeModel> tvshows)
+		//{
+		//	using ICoreScope scope = _coreScopeProvider.CreateCoreScope();
+		//	List<IMedia> mediaList = new List<IMedia>();
+
+		//	foreach (var show in tvshows)
+		//	{
+		//		var image = ImportMediaAsync(show).GetAwaiter().GetResult();
+		//		if (image != null)
+		//		{
+		//			mediaList.Add(image);
+		//		}
+				
+		//	}
+		//	scope.Complete();
+		//	return mediaList;
+		//}
 	}
 }

@@ -1,0 +1,19 @@
+{
+  "Name": "Show",
+  "Alias": "show",
+  "File": "umb://template-file/show.cshtml",
+  "Master": "umb://template/de48e97a7f834dcf8d4a1c8a5fddf142",
+  "Udi": "umb://template/4aca1920b7cb4c1c884f86580239eac4",
+  "Dependencies": [
+    {
+      "Udi": "umb://template-file/show.cshtml",
+      "Ordering": true
+    },
+    {
+      "Udi": "umb://template/de48e97a7f834dcf8d4a1c8a5fddf142",
+      "Ordering": true
+    }
+  ],
+  "__type": "Umbraco.Deploy.Infrastructure,Umbraco.Deploy.Infrastructure.Artifacts.TemplateArtifact",
+  "__version": "14.0.2"
+}

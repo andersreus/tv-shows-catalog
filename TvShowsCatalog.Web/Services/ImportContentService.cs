@@ -3,6 +3,7 @@ using TvShowsCatalog.Web.Models.ApiModels;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Scoping;
 using Umbraco.Cms.Core.Services;
+using Umbraco.Extensions;
 
 namespace TvShowsCatalog.Web.Services
 {
@@ -21,11 +22,17 @@ namespace TvShowsCatalog.Web.Services
             _coreScopeProvider = coreScopeProvider;
 		}
 
-		public void CreateContent(TvMazeModel tvshow, int rootContentId, string[] cultures)
+        // pass in IMedia object
+		public void CreateContent(TvMazeModel tvshow, IMedia media, int rootContentId, string[] cultures)
 		{
+            // need tvshows node id, have homepage now as well
 			var node = _contentService.Create($"{tvshow.Name}", rootContentId, "tVShow");
 			node.SetValue("showSummary", $"{tvshow.Summary}");
-			// SetValue -> mediapicker image
+
+            if (media != null)
+            {
+                node.SetValue("showImage", media.GetUdi().ToString());
+            }
 
 			_contentService.Save(node);
 			_contentService.Publish(node, cultures);
@@ -39,10 +46,12 @@ namespace TvShowsCatalog.Web.Services
             var cultures = Array.Empty<string>();
 
 			using ICoreScope scope = _coreScopeProvider.CreateCoreScope();
-            _importMediaService.ImportBulkMedia(allTvShows);
+
 			foreach (var show in allTvShows)
             {
-                CreateContent(show, rootContentId, cultures);
+				var media = _importMediaService.ImportMediaAsync(show).GetAwaiter().GetResult();
+                // Update rootContentId for the tvshows node id
+				CreateContent(show, media, rootContentId, cultures);
 			}
 			scope.Complete();
 
@@ -51,14 +60,17 @@ namespace TvShowsCatalog.Web.Services
 
         public (bool, int) ShouldRunImport()
         {
+            // Refactor, needs to check for tvshows node under homepage node
             var rootContent = _contentService.GetRootContent().FirstOrDefault();
 
             if (rootContent == null)
             {
                 throw new Exception("Root content node was not found");
             }
+            // node id for tv shows
             var rootContentId = rootContent.Id;
             
+            // has tv shows page any children?
             bool isThereContent = _contentService.HasChildren(rootContentId);
 
             return (isThereContent,rootContentId);

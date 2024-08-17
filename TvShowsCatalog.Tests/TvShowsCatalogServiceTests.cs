@@ -49,19 +49,19 @@ namespace TvShowsCatalog.Tests
 			Assert.IsNotNull(savedMedia);
 		}
 
-		[Test]
-		public void ImportBulkMedia_CreateAndSafeAllMediaInBackoffice()
-		{
-			var allShows = _tvMazeService.GetAllAsync().GetAwaiter().GetResult();
+		//[Test]
+		//public void ImportBulkMedia_CreateAndSafeAllMediaInBackoffice()
+		//{
+		//	var allShows = _tvMazeService.GetAllAsync().GetAwaiter().GetResult();
 
-			var mediaFolder = _importMediaService.CreateMediaRootFolder();
+		//	var mediaFolder = _importMediaService.CreateMediaRootFolder();
 
-			_importMediaService.ImportBulkMedia(allShows);
+		//	_importMediaService.ImportBulkMedia(allShows);
 
-			int count = _mediaService.CountChildren(mediaFolder.Id);
+		//	int count = _mediaService.CountChildren(mediaFolder.Id);
 
-			Assert.AreEqual(240, count);
-		}
+		//	Assert.AreEqual(240, count);
+		//}
 
 		[Test]
 		public void ImportContent_CreateAndSafeAllTvShowsAsNodesInBackoffice()

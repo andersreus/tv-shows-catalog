@@ -1,12 +1,12 @@
 {
   "Name": "TV Shows",
   "Alias": "tvShows",
-  "DefaultTemplate": "umb://template/2195738793ae462f983803f65bfe9d43",
+  "DefaultTemplate": "umb://template/57c54d2d3cac4aa8917a699910197f28",
   "AllowedTemplates": [
-    "umb://template/2195738793ae462f983803f65bfe9d43"
+    "umb://template/57c54d2d3cac4aa8917a699910197f28"
   ],
   "HistoryCleanup": {},
-  "Icon": "icon-document",
+  "Icon": "icon-ordered-list color-pink",
   "Thumbnail": "folder.png",
   "Permissions": {
     "AllowedAtRoot": true,
@@ -14,16 +14,21 @@
       "umb://document-type/e7139c5ce01b4f36acf83f1c1ef18361"
     ]
   },
+  "Parent": "umb://document-type-container/3026b6a90e864d27b8ef618db53a45fb",
   "CompositionContentTypes": [],
   "PropertyGroups": [],
   "PropertyTypes": [],
   "Udi": "umb://document-type/889800e5b82f44c9ae657ca89636964c",
   "Dependencies": [
     {
+      "Udi": "umb://document-type-container/3026b6a90e864d27b8ef618db53a45fb",
+      "Ordering": true
+    },
+    {
       "Udi": "umb://document-type/e7139c5ce01b4f36acf83f1c1ef18361"
     },
     {
-      "Udi": "umb://template/2195738793ae462f983803f65bfe9d43",
+      "Udi": "umb://template/57c54d2d3cac4aa8917a699910197f28",
       "Ordering": true
     }
   ],
