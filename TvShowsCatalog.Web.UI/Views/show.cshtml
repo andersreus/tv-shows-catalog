@@ -4,3 +4,16 @@
 	Layout = "main.cshtml";
 }
 
+<div class="blog-container">
+    <h1>@Model.Name</h1>
+
+    <div class="summary">
+        @Html.Raw(Model.Value<string>("showSummary"))
+    </div>
+
+    @if (Model.HasValue("showImage"))
+    {
+        var image = Model.Value<IPublishedContent>("showImage");
+        <img src="@image.Url()" alt="@image.Name" />
+    }
+</div>

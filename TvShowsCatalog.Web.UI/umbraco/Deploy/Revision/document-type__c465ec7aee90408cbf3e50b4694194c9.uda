@@ -1,0 +1,32 @@
+{
+  "Name": "LoginPage",
+  "Alias": "loginPage",
+  "DefaultTemplate": "umb://template/0b6045525aa74c2b8c34c9ec6ae4aa1a",
+  "AllowedTemplates": [
+    "umb://template/0b6045525aa74c2b8c34c9ec6ae4aa1a"
+  ],
+  "HistoryCleanup": {},
+  "Icon": "icon-combination-lock",
+  "Thumbnail": "folder.png",
+  "Permissions": {
+    "AllowedAtRoot": true,
+    "AllowedChildContentTypes": []
+  },
+  "Parent": "umb://document-type-container/3026b6a90e864d27b8ef618db53a45fb",
+  "CompositionContentTypes": [],
+  "PropertyGroups": [],
+  "PropertyTypes": [],
+  "Udi": "umb://document-type/c465ec7aee90408cbf3e50b4694194c9",
+  "Dependencies": [
+    {
+      "Udi": "umb://document-type-container/3026b6a90e864d27b8ef618db53a45fb",
+      "Ordering": true
+    },
+    {
+      "Udi": "umb://template/0b6045525aa74c2b8c34c9ec6ae4aa1a",
+      "Ordering": true
+    }
+  ],
+  "__type": "Umbraco.Deploy.Infrastructure,Umbraco.Deploy.Infrastructure.Artifacts.ContentType.DocumentTypeArtifact",
+  "__version": "14.0.2"
+}

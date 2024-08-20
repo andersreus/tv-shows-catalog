@@ -13,20 +13,22 @@ namespace TvShowsCatalog.Web.Services
         private readonly ITvMazeService _tvMazeService;
         private readonly IImportMediaService _importMediaService;
         private readonly ICoreScopeProvider _coreScopeProvider;
+        private readonly IContentTypeService _contentTypeService;
 
-        public ImportContentService(IContentService contentService, ITvMazeService tVMazeService, IImportMediaService importMediaService, ICoreScopeProvider coreScopeProvider)
+        public ImportContentService(IContentService contentService, ITvMazeService tVMazeService, IImportMediaService importMediaService, ICoreScopeProvider coreScopeProvider, IContentTypeService contentTypeService)
         {
             _contentService = contentService;
             _tvMazeService = tVMazeService;
             _importMediaService = importMediaService;
             _coreScopeProvider = coreScopeProvider;
+            _contentTypeService = contentTypeService;
 		}
 
         // pass in IMedia object
-		public void CreateContent(TvMazeModel tvshow, IMedia media, int rootContentId, string[] cultures)
+		public void CreateContent(TvMazeModel tvshow, IMedia media, int allTvShowsContentNodeId, string[] cultures, IContentType tvShowContentType)
 		{
             // need tvshows node id, have homepage now as well
-			var node = _contentService.Create($"{tvshow.Name}", rootContentId, "tVShow");
+			var node = _contentService.Create($"{tvshow.Name}", allTvShowsContentNodeId, "tVShow");
 			node.SetValue("showSummary", $"{tvshow.Summary}");
 
             if (media != null)
@@ -34,16 +36,24 @@ namespace TvShowsCatalog.Web.Services
                 node.SetValue("showImage", media.GetUdi().ToString());
             }
 
-			_contentService.Save(node);
+            // Sets template for the nodes all can be rendered out of the box.
+            var template = tvShowContentType.AllowedTemplates.FirstOrDefault(t => t.Alias == "show");
+            if (template != null)
+            {
+                node.TemplateId = template.Id;
+            }
+
+            _contentService.Save(node);
 			_contentService.Publish(node, cultures);
 		}
 
 		// TODO: Check for updated/added tvshows?
 
-		public IEnumerable<TvMazeModel> ImportContent(int rootContentId)
+		public IEnumerable<TvMazeModel> ImportContent(int allTvShowsContentNodeId)
         {
             var allTvShows = _tvMazeService.GetAllAsync().GetAwaiter().GetResult();
             var cultures = Array.Empty<string>();
+            var tvShowContentType = _contentTypeService.Get("tvShow");
 
 			using ICoreScope scope = _coreScopeProvider.CreateCoreScope();
 
@@ -51,7 +61,7 @@ namespace TvShowsCatalog.Web.Services
             {
 				var media = _importMediaService.ImportMediaAsync(show).GetAwaiter().GetResult();
                 // Update rootContentId for the tvshows node id
-				CreateContent(show, media, rootContentId, cultures);
+				CreateContent(show, media, allTvShowsContentNodeId, cultures, tvShowContentType);
 			}
 			scope.Complete();
 
@@ -61,19 +71,19 @@ namespace TvShowsCatalog.Web.Services
         public (bool, int) ShouldRunImport()
         {
             // Refactor, needs to check for tvshows node under homepage node
-            var rootContent = _contentService.GetRootContent().FirstOrDefault();
+            var allTvShowsContentNode = _contentService.GetRootContent().FirstOrDefault(c => c.Id == 1059);
 
-            if (rootContent == null)
+            if (allTvShowsContentNode == null)
             {
-                throw new Exception("Root content node was not found");
+                throw new Exception("TV Shows root content node was not found");
             }
             // node id for tv shows
-            var rootContentId = rootContent.Id;
+            var allTvShowsContentNodeId = allTvShowsContentNode.Id;
             
             // has tv shows page any children?
-            bool isThereContent = _contentService.HasChildren(rootContentId);
+            bool isThereContent = _contentService.HasChildren(allTvShowsContentNodeId);
 
-            return (isThereContent,rootContentId);
+            return (isThereContent, allTvShowsContentNodeId);
         }
     }
 }

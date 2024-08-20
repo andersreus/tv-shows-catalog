@@ -21,12 +21,12 @@ namespace TvShowsCatalog.Web.UI
         public async Task RunJobAsync()
         {
             // TODO: tuple = bad practice. Rethink
-			var (shouldRunImport, rootContentId) = _importContentService.ShouldRunImport();
+			var (shouldRunImport, allTvShowsContentNodeId) = _importContentService.ShouldRunImport();
 
             if (!shouldRunImport)
             {
                 // Pass rootcontentId for tvshows node
-				_importContentService.ImportContent(rootContentId);
+				_importContentService.ImportContent(allTvShowsContentNodeId);
 			}
         }
     }

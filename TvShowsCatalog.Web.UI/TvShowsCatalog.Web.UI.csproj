@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Twilio" Version="7.2.2" />
     <PackageReference Include="Umbraco.Cloud.Cms" Version="14.0.0" />
     <PackageReference Include="Umbraco.Cloud.Cms.PublicAccess" Version="14.0.0" />
     <PackageReference Include="Umbraco.Cloud.Identity.Cms" Version="14.0.1" />
@@ -30,7 +31,7 @@
   </PropertyGroup>
 
   <PropertyGroup><!-- Remove RazorCompileOnBuild and RazorCompileOnPublish when not using ModelsMode InMemoryAuto -->
-  
+ 
     <UserSecretsId>863e66b8-5c7f-46a9-b32b-50a39c5714e3</UserSecretsId>
   </PropertyGroup>
 

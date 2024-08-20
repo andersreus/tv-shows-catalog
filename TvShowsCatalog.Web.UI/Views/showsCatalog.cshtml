@@ -3,8 +3,6 @@
 	Layout = "main.cshtml";
 }
 
-@await Html.PartialAsync("header")
-
 @{
 	var selection = Umbraco.Content(Guid.Parse("c6b99edf-6e1b-4732-a216-a80c607fa041"))
     .ChildrenOfType("tvShow")
@@ -19,7 +17,3 @@
 		</li>
 	}
 </ul>
-
-@await Html.PartialAsync("portfolio")
-@await Html.PartialAsync("about")
-@await Html.PartialAsync("contact")

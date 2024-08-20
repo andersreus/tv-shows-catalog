@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Umbraco.Cms.Core.Scoping;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Core.Web;
 using Umbraco.Cms.Web.Common.Controllers;
@@ -10,40 +11,53 @@ namespace TvShowsCatalog.Web.UI.Controllers
         private readonly IContentService _contentService;
         private readonly IUmbracoContextFactory _contextFactory;
         private readonly IMediaService _mediaService;
+		private readonly ICoreScopeProvider _coreScopeProvider;
 
-        public BulkDeleteBackofficeItemsController(IContentService contentService, IUmbracoContextFactory contextFactory, IMediaService mediaService)
+        public BulkDeleteBackofficeItemsController(IContentService contentService, IUmbracoContextFactory contextFactory, IMediaService mediaService, ICoreScopeProvider coreScopeProvider)
         {
             _contentService = contentService;
             _contextFactory = contextFactory;
             _mediaService = mediaService;
+			_coreScopeProvider = coreScopeProvider;
         }
 
-        // This was only for the time where tvshows was the only root node. Now there is Home root node.
+        // To make sure I only delete children of the tvshow maze list view parent, pass in the id of that
+        [HttpPost]
+        public IActionResult DeleteChildrenContentNodes(int parentNodeId)
+        {
+            try
+            {
+				using (var contextReference = _contextFactory.EnsureUmbracoContext())
+				{
+					var rootNode = _contentService.GetById(parentNodeId);
+					if (rootNode != null)
+					{
+						var childNodes = _contentService.GetPagedChildren(rootNode.Id, 0, int.MaxValue, out long totalChildren).ToList();
+						if (childNodes.Any())
+						{
+							using (var scope = _coreScopeProvider.CreateCoreScope())
+							{
+								foreach (var childNode in childNodes)
+								{
+									_contentService.Delete(childNode);
+								}
+								scope.Complete();
+							}	
+						}
+					}
+				}
 
-        //[HttpPost]
-        //public IActionResult DeleteChildrenContentNodes()
-        //{
-        //    using (var contextReference = _contextFactory.EnsureUmbracoContext())
-        //    {
-        //        var rootNodes = _contentService.GetRootContent().ToList();
-        //        foreach (var rootNode in rootNodes)
-        //        {
-        //            var childNodes = _contentService.GetPagedChildren(rootNode.Id, 0, int.MaxValue, out long totalChildren).ToList();
-        //            if (childNodes.Any())
-        //            {
-        //                foreach (var childNode in childNodes)
-        //                {
-        //                    _contentService.Delete(childNode);
-        //                }
-        //            }
-        //        }
-        //    }
-
-        //    return Ok("All child nodes under root content nodes have been deleted.");
-        //}
+				return Ok("All child nodes under root content nodes have been deleted.");
+			}
+			catch (Exception ex)
+			{
+				return StatusCode(500, "An error occurred while deleting child nodes.");
+			}
+            
+        }
 
 
-		[HttpPost]
+        [HttpPost]
 		public IActionResult DeleteChildrenMediaItems()
 		{
 			using (var contextReference = _contextFactory.EnsureUmbracoContext())
