@@ -12,39 +12,39 @@
 	var countryCode = _httpContextAccessor.HttpContext.Session.GetString(AuthenticationSurfaceController.CountryCodeKey) ?? "45";
 	var phoneNumber = _httpContextAccessor.HttpContext.Session.GetString(AuthenticationSurfaceController.UserNameKey);
 }
-@* <script src="https://www.google.com/recaptcha/api.js"></script>
-<script>
-	var onSubmit = function (token) {
-		document.getElementById('g_recaptcha_token').value = token;
-	};
-</script> *@
-@if (currentMember == null)
-{
-	using (Html.BeginUmbracoForm<AuthenticationSurfaceController>(action: nameof(AuthenticationSurfaceController.Login)))
-	{
-		<div>
-			+<input class="text-lg rounded-md w-16 inline-block bg-blue-950 p-2 border text-white border-indigo-500/100" type="number" id="member_country_code" name="member_country_code" value="@countryCode" required>
-			<input class="rounded-md border border-indigo-500/100 p-2 bg-blue-950 text-white text-lg" type="number" id="member_number" name="member_number" value="@phoneNumber" required>
-		</div>
-		if (!string.IsNullOrWhiteSpace(phoneNumber))
-		{
-			<input class="rounded-md border border-indigo-500/100 p-2 bg-blue-950 text-white text-lg" type="number" id="otp" name="otp">
-		}
-		<input type="hidden" id="redirect_url" name="redirect_url">
-		// <input type="hidden" id="g_recaptcha_token" name="g_recaptcha_token">
-		// <div class="g-recaptcha" data-sitekey="6Lez2FkpAAAAAKs7uabXSLKweGjfxBaMA2mjzhXw" data-callback="onSubmit" data-size="invisible"></div>
-		<input class="mt-3 py-2 px-4 text-white rounded-md bg-indigo-500 hover:bg-indigo-400" type="submit" value="Login">
-	}
-}
-else
-{
-	<h1>Why are you trying to login again?</h1>
-}
 
+<div class="container">
+    @if (currentMember == null)
+    {
+        using (Html.BeginUmbracoForm<AuthenticationSurfaceController>(action: nameof(AuthenticationSurfaceController.Login)))
+        {
+            <div class="form-container">
+                <div id="message" class="text-white mb-4">Please enter your phone number:</div>
+                <div class="input-group">
+                    <span class="text-lg text-white">+</span>
+                    <input class="text-lg rounded-md w-16 inline-block bg-blue-950 p-2 border text-white border-indigo-500/100" type="number" id="member_country_code" name="member_country_code" value="@countryCode" required>
+                    <input class="rounded-md border border-indigo-500/100 p-2 bg-blue-950 text-white text-lg" type="number" id="member_number" name="member_number" value="@phoneNumber" required>
+                </div>
+                @if (!string.IsNullOrWhiteSpace(phoneNumber))
+                {
+                    <div id="otp-message" class="text-white mt-4">Please enter the code sent to your phone:</div>
+                    <input class="rounded-md border border-indigo-500/100 p-2 bg-blue-950 text-white text-lg" type="number" id="otp" name="otp">
+                }
+                <input type="hidden" id="redirect_url" name="redirect_url">
+                <input class="mt-3 py-2 px-4 text-white rounded-md bg-indigo-500 hover:bg-indigo-400" type="submit" value="Login">
+            </div>
+        }
+    }
+    else
+    {
+        <div class="text-center mt-5">
+            <h1 class="text-2xl text-white">Why are you trying to login again?</h1>
+        </div>
+    }
+</div>
 
 <script>
-	window.onload = async () => {
-		// grecaptcha.execute();
-		document.getElementById('redirect_url').value = new URL(window.location.href).pathname;
-	}
+    window.onload = async () => {
+        document.getElementById('redirect_url').value = new URL(window.location.href).pathname;
+    }
 </script>
