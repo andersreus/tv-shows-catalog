@@ -1,5 +1,5 @@
-using TvShowsCatalog.Web.Services;
 using TvShowsCatalog.Web.UI;
+using TvShowsCatalog.Web.UI.Data;
 using Twilio;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -11,6 +11,11 @@ builder.CreateUmbracoBuilder()
     .AddComposers()
     .SetCustomMemberLoginPath()
     .Build();
+
+builder.Services.AddUmbracoDbContext<ReviewContext>((serviceProvider, options) =>
+{
+    options.UseUmbracoDatabaseProvider(serviceProvider);
+});
 
 WebApplication app = builder.Build();
 
