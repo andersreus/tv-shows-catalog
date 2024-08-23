@@ -9,11 +9,17 @@
     .Where(x => x.IsVisible())
     .OrderBy(x => x.Name);
 }
-<ul>
+<ul class="grid-container">
 	@foreach (var item in selection)
 	{
-		<li>
-			<a href="@item.Url()">@item.Name()</a>
+		<li class="grid-item">
+			@if (item.HasValue("showImage"))
+			{
+				var image = item.Value<IPublishedContent>("showImage");
+				<a href="@item.Url()">
+					<img src="@image.Url()" alt="@image.Name"/>
+				</a>
+			}
 		</li>
 	}
 </ul>

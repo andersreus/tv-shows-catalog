@@ -1,17 +1,19 @@
-.blog-container {
+/* Styles for the individual tv show page */
+
+.tvshow-container {
     text-align: center;
     margin: 0 auto;
     max-width: 800px;
     padding: 20px;
 }
 
-.blog-container img {
+.tvshow-container img {
     max-width: 100%;
     height: auto;
     margin: 20px 0;
 }
 
-.blog-container .summary {
+.tvshow-container .summary {
     font-size: 1.2em;
     line-height: 1.6;
     margin: 20px 0;
@@ -111,3 +113,34 @@
 .mb-4 {
     margin-bottom: 1rem;
 }
+
+/* Styling for the grid views for the tvshows on the main page */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+    padding: 0;
+    list-style: none;
+}
+
+.grid-item {
+    position: relative;
+    overflow: hidden;
+}
+
+    .grid-item img {
+        width: 100%;
+        height: auto;
+        display: block;
+        transition: transform 0.3s ease;
+    }
+
+    .grid-item:hover img {
+        transform: scale(1.05);
+    }
+
+    /* Optional: Different sizes for some items */
+    .grid-item:nth-child(3n) {
+        grid-column: span 2;
+        grid-row: span 2;
+    }
