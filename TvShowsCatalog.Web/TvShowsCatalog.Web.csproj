@@ -21,7 +21,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />
-    <PackageReference Include="Umbraco.Cms.Core" Version="14.1.2" />
+    <PackageReference Include="Umbraco.Cms.Core" Version="14.2.0" />
     <PackageReference Include="Umbraco.Cms.Persistence.EFCore" Version="14.1.2" />
   </ItemGroup>
 
