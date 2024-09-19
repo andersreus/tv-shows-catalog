@@ -19,7 +19,7 @@
         using (Html.BeginUmbracoForm<AuthenticationSurfaceController>(action: nameof(AuthenticationSurfaceController.Login)))
         {
             <div class="form-container">
-                <div id="message" class="text-white mb-4">Please enter your phone number:</div>
+                <div id="message" class="text-white mb-4">Please enter your name & phone number:</div>
                 <div class="input-group">
                     <span class="text-lg text-white">+</span>
                     <input class="text-lg rounded-md w-16 inline-block bg-blue-950 p-2 border text-white border-indigo-500/100" type="number" id="member_country_code" name="member_country_code" value="@countryCode" required>

@@ -1,7 +1,8 @@
 ﻿@using Umbraco.Cms.Web.Common.PublishedModels;
-@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<TvShowReviewViewModel>
+
 @{
-	Layout = "main.cshtml";
+    Layout = "main.cshtml";
 }
 
 <div class="tvshow-container">
@@ -15,5 +16,25 @@
     {
         var image = Model.Value<IPublishedContent>("showImage");
         <img src="@image.Url()" alt="@image.Name" />
+    }
+</div>
+<div class="tvshow-review-container">
+    <h2>Please leave a review for the tv show</h2>
+
+    @using (Html.BeginUmbracoForm<ReviewFormController>(nameof(ReviewFormController.AddReview)))
+    {
+        <div class="input-group">
+            <label asp-for="@Model.PostReview.Rating">Give it a rating between 1 and 10</label>
+            <input asp-for="@Model.PostReview.Rating" name="Rating"/>
+        </div>
+        <div>
+            <label asp-for="@Model.PostReview.Comment">Throw a comment to your review</label>
+            <input asp-for="@Model.PostReview.Comment" name="Comment"/>
+        </div>
+        <div>
+            <input name="TvShowUmbracoKey" type="hidden" value="@Model.Key">
+        </div>
+        <br />
+        <input type="submit" name="Submit" value="Submit" />
     }
 </div>

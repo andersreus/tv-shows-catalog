@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace TvShowsCatalog.Web.UI.Migrations
+namespace TvShowsCatalog.Web.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class initialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -15,13 +15,13 @@ namespace TvShowsCatalog.Web.UI.Migrations
                 name: "review",
                 columns: table => new
                 {
-                    id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    tvShowUmbracoKey = table.Column<Guid>(type: "TEXT", nullable: false),
-                    memberUmbracoKey = table.Column<Guid>(type: "TEXT", nullable: false),
-                    rating = table.Column<int>(type: "INTEGER", nullable: false),
-                    comment = table.Column<string>(type: "TEXT", nullable: false),
-                    creationDate = table.Column<DateTime>(type: "TEXT", nullable: false)
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    tvShowUmbracoKey = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    memberUmbracoKey = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    rating = table.Column<int>(type: "int", nullable: false),
+                    comment = table.Column<string>(type: "nvarchar(255)", nullable: false),
+                    creationDate = table.Column<DateTime>(type: "datetime", nullable: false)
                 },
                 constraints: table =>
                 {

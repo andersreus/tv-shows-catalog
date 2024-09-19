@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using TvShowsCatalog.Web.UI.Data;
+using TvShowsCatalog.Web.Data;
 using Umbraco.Cms.Core.Events;
 using Umbraco.Cms.Core.Notifications;
 

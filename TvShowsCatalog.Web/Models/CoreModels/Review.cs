@@ -10,7 +10,7 @@ namespace TvShowsCatalog.Web.Models.CoreModels
     {
         public int Id { get; set; }
         public Guid TvShowUmbracoKey { get; set; }
-        public Guid MemberUmbracoKEy { get; set; }
+        public Guid MemberUmbracoKey { get; set; }
         public required int Rating { get; set; }
         public string Comment { get; set; } = string.Empty;
         public DateTime CreationDate { get; set; }

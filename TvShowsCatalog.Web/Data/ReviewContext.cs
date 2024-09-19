@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TvShowsCatalog.Web.Models.CoreModels;
 
-namespace TvShowsCatalog.Web.UI.Data
+namespace TvShowsCatalog.Web.Data
 {
     public class ReviewContext : DbContext
     {
@@ -18,11 +18,11 @@ namespace TvShowsCatalog.Web.UI.Data
                 entity.ToTable("review");
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id).HasColumnName("id");
-                entity.Property(e => e.TvShowUmbracoKey).HasColumnName("tvShowUmbracoKey");
-                entity.Property(e => e.MemberUmbracoKEy).HasColumnName("memberUmbracoKey");
-                entity.Property(e => e.Rating).HasColumnName("rating");
-                entity.Property(e => e.Comment).HasColumnName("comment");
-                entity.Property(e => e.CreationDate).HasColumnName("creationDate");
+                entity.Property(e => e.TvShowUmbracoKey).HasColumnName("tvShowUmbracoKey").HasColumnType("uniqueidentifier");
+                entity.Property(e => e.MemberUmbracoKey).HasColumnName("memberUmbracoKey").HasColumnType("uniqueidentifier");
+                entity.Property(e => e.Rating).HasColumnName("rating").HasColumnType("int");
+                entity.Property(e => e.Comment).HasColumnName("comment").HasColumnType("nvarchar(255)");
+                entity.Property(e => e.CreationDate).HasColumnName("creationDate").HasColumnType("datetime");
             });
     }
 }

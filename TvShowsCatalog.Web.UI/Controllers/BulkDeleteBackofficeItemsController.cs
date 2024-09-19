@@ -6,7 +6,10 @@ using Umbraco.Cms.Web.Common.Controllers;
 
 namespace TvShowsCatalog.Web.UI.Controllers
 {
-    public class BulkDeleteBackofficeItemsController : UmbracoApiController
+	// UmbracoApiController is obsolete in Umbraco 14. So I used the "Controller" base class instead from .net core.
+    [ApiController]
+    [Route("/umbraco/api/bulkdeletebackofficeitems")]
+    public class BulkDeleteBackofficeItemsController : Controller
     {
         private readonly IContentService _contentService;
         private readonly IUmbracoContextFactory _contextFactory;
@@ -21,8 +24,7 @@ namespace TvShowsCatalog.Web.UI.Controllers
 			_coreScopeProvider = coreScopeProvider;
         }
 
-        // To make sure I only delete children of the tvshow maze list view parent, pass in the id of that
-        [HttpPost]
+		[HttpPost("deletechildrencontentnodes")]
         public IActionResult DeleteChildrenContentNodes(int parentNodeId)
         {
             try
@@ -57,8 +59,8 @@ namespace TvShowsCatalog.Web.UI.Controllers
         }
 
 
-        [HttpPost]
-		public IActionResult DeleteChildrenMediaItems()
+        [HttpPost("deletechildrenmediaitems")]
+        public IActionResult DeleteChildrenMediaItems()
 		{
 			using (var contextReference = _contextFactory.EnsureUmbracoContext())
 			{

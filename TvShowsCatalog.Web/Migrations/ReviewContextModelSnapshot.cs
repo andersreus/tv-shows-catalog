@@ -2,50 +2,54 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using TvShowsCatalog.Web.UI.Data;
+using TvShowsCatalog.Web.Data;
 
 #nullable disable
 
-namespace TvShowsCatalog.Web.UI.Migrations
+namespace TvShowsCatalog.Web.Migrations
 {
     [DbContext(typeof(ReviewContext))]
-    [Migration("20240822160030_InitialCreate")]
-    partial class InitialCreate
+    partial class ReviewContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "8.0.8");
+            modelBuilder
+                .HasAnnotation("ProductVersion", "8.0.8")
+                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
             modelBuilder.Entity("TvShowsCatalog.Web.Models.CoreModels.Review", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("int")
                         .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Comment")
                         .IsRequired()
-                        .HasColumnType("TEXT")
+                        .HasColumnType("nvarchar(255)")
                         .HasColumnName("comment");
 
                     b.Property<DateTime>("CreationDate")
-                        .HasColumnType("TEXT")
+                        .HasColumnType("datetime")
                         .HasColumnName("creationDate");
 
-                    b.Property<Guid>("MemberUmbracoKEy")
-                        .HasColumnType("TEXT")
+                    b.Property<Guid>("MemberUmbracoKey")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("memberUmbracoKey");
 
                     b.Property<int>("Rating")
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("int")
                         .HasColumnName("rating");
 
                     b.Property<Guid>("TvShowUmbracoKey")
-                        .HasColumnType("TEXT")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("tvShowUmbracoKey");
 
                     b.HasKey("Id");
