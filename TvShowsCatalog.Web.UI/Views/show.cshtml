@@ -17,6 +17,13 @@
         var image = Model.Value<IPublishedContent>("showImage");
         <img src="@image.Url()" alt="@image.Name" />
     }
+
+    @foreach (var review in Model.Reviews)
+    {
+        <p>@review.Rating</p>
+        <p>@review.Comment</p>
+        <p>@review.CreationDate</p>
+    }
 </div>
 <div class="tvshow-review-container">
     <h2>Please leave a review for the tv show</h2>
