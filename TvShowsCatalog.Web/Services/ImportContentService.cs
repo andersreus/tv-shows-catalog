@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using Org.BouncyCastle.Security;
+using System.ComponentModel;
 using TvShowsCatalog.Web.Models.ApiModels;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Scoping;
@@ -70,17 +71,15 @@ namespace TvShowsCatalog.Web.Services
 
         public (bool, int) ShouldRunImport()
         {
-            // Refactor, needs to check for tvshows node under homepage node
-            var allTvShowsContentNode = _contentService.GetRootContent().FirstOrDefault(c => c.Id == 1059);
+            var allTvShowsContentNode = _contentService.GetRootContent().FirstOrDefault(c => c.ContentType.Alias == "tvShows");
 
             if (allTvShowsContentNode == null)
             {
                 throw new Exception("TV Shows root content node was not found");
             }
-            // node id for tv shows
+
             var allTvShowsContentNodeId = allTvShowsContentNode.Id;
             
-            // has tv shows page any children?
             bool isThereContent = _contentService.HasChildren(allTvShowsContentNodeId);
 
             return (isThereContent, allTvShowsContentNodeId);

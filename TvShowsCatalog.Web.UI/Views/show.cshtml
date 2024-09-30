@@ -6,42 +6,67 @@
 }
 
 <div class="tvshow-container">
-    <h1>@Model.Name</h1>
-
-    <div class="summary">
-        @Html.Raw(Model.Value<string>("showSummary"))
+    <div class="tvshow-header">
+        <h1>@Model.Name</h1>
     </div>
 
-    @if (Model.HasValue("showImage"))
-    {
-        var image = Model.Value<IPublishedContent>("showImage");
-        <img src="@image.Url()" alt="@image.Name" />
-    }
+    <div class="tvshow-content">
+        @if (Model.HasValue("showImage"))
+        {
+            var image = Model.Value<IPublishedContent>("showImage");
+            <div class="tvshow-image">
+                <img src="@image.Url()" alt="@image.Name" />
+            </div>
+        }
+        <div class="tvshow-summary">
+            <p>@Html.Raw(Model.Value<string>("showSummary"))</p>
+        </div>
+    </div>
 
-    @foreach (var review in Model.Reviews)
-    {
-        <p>@review.Rating</p>
-        <p>@review.Comment</p>
-        <p>@review.CreationDate</p>
-    }
+    <div class="reviews-section">
+        <h2>Reviews</h2>
+        @if (Model.Reviews.Any())
+        {
+            @foreach (var review in Model.Reviews)
+            {
+                <div class="review">
+                    <div class="review-rating">
+                        <strong>Rating:</strong> @review.Rating / 10
+                    </div>
+                    <div class="review-comment">
+                        <p>@review.Comment</p>
+                    </div>
+                    <div class="review-date">
+                        <small>@review.CreationDate.ToString("MMMM dd, yyyy HH:mm")</small>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <p>No reviews yet. Be the first to leave a review!</p>
+        }
+    </div>
 </div>
+
 <div class="tvshow-review-container">
-    <h2>Please leave a review for the tv show</h2>
+    <h2>Please leave a review for the TV show</h2>
 
     @using (Html.BeginUmbracoForm<ReviewFormController>(nameof(ReviewFormController.AddReview)))
     {
         <div class="input-group">
             <label asp-for="@Model.PostReview.Rating">Give it a rating between 1 and 10</label>
-            <input asp-for="@Model.PostReview.Rating" name="Rating"/>
+            <input asp-for="@Model.PostReview.Rating" name="Rating" type="number" min="1" max="10" />
         </div>
-        <div>
+        <div class="input-group">
             <label asp-for="@Model.PostReview.Comment">Throw a comment to your review</label>
-            <input asp-for="@Model.PostReview.Comment" name="Comment"/>
+            <textarea asp-for="@Model.PostReview.Comment" name="Comment"></textarea>
         </div>
         <div>
-            <input name="TvShowUmbracoKey" type="hidden" value="@Model.Key">
+            <input name="TvShowUmbracoKey" type="hidden" value="@Model.Key" />
         </div>
-        <br />
-        <input type="submit" name="Submit" value="Submit" />
+        <div class="submit-container">
+            <input type="submit" name="Submit" value="Submit" />
+        </div>
     }
 </div>

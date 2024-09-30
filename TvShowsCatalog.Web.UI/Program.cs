@@ -14,10 +14,8 @@ builder.CreateUmbracoBuilder()
     .SetCustomMemberLoginPath()
 .Build();
 
-// Is it best practive to register DbContext before creating umbracobuilder and adding services above?
 builder.Services.AddDbContext<ReviewContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("umbracoDbDSN")));
-
 
 // Fra docs men det defaulter til sqlite når jeg køre migrations.
 //builder.Services.AddUmbracoDbContext<ReviewContext>((serviceProvider, options) =>

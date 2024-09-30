@@ -3,5 +3,5 @@
   "Udi": "umb://member-group/04c4ff0bc02a4c1cb04020d9b464c2b9",
   "Dependencies": [],
   "__type": "Umbraco.Deploy.Infrastructure,Umbraco.Deploy.Infrastructure.Artifacts.MemberGroupArtifact",
-  "__version": "14.0.2"
+  "__version": "14.1.1"
 }

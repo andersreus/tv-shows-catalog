@@ -5,9 +5,10 @@ namespace TvShowsCatalog.Web.UI
 {
     public class ContentImportFromMaze : IRecurringBackgroundJob
     {
-        public TimeSpan Period { get => TimeSpan.FromMinutes(60); }
+        public TimeSpan Period { get => TimeSpan.FromHours(1); }
 
-        TimeSpan Delay = TimeSpan.FromSeconds(1);
+        // Run initial import 30 seconds after application start. After that, one hour between.
+        TimeSpan Delay = TimeSpan.FromSeconds(30);
 
         public event EventHandler PeriodChanged { add { } remove { } }
 
