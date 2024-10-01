@@ -1,4 +1,5 @@
 ﻿using HtmlAgilityPack;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -33,6 +34,7 @@ namespace TvShowsCatalog.Web.Services
         }
 
         // Build on the one below to iterate through all tvmaze pages and deserialize all tv shows.
+        // Remember to inject ILogger
 
         /*
         public async Task<IEnumerable<TvMazeModel>> GetAllAsync()
@@ -73,15 +75,16 @@ namespace TvShowsCatalog.Web.Services
             }
             catch (HttpRequestException ex)
             {
-                Console.WriteLine($"Request error: {ex.Message}");
+                _logger.LogError("Request error: ", ex);
             }
             catch (JsonException ex)
             {
-                Console.WriteLine($"JSON deserialization error: {ex.Message}");
+                _logger.LogError("JSON deserialization error: ", ex);
             }
 
             return allTvShows;
         }
         */
+        
     }
 }

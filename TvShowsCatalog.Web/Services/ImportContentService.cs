@@ -1,5 +1,4 @@
-﻿using Org.BouncyCastle.Security;
-using System.ComponentModel;
+﻿using TvShowsCatalog.Web.Helpers;
 using TvShowsCatalog.Web.Models.ApiModels;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Scoping;
@@ -69,7 +68,7 @@ namespace TvShowsCatalog.Web.Services
 			return allTvShows;
         }
 
-        public (bool, int) ShouldRunImport()
+        public ImportDecision ShouldRunImport()
         {
             var allTvShowsContentNode = _contentService.GetRootContent().FirstOrDefault(c => c.ContentType.Alias == "tvShows");
 
@@ -82,7 +81,11 @@ namespace TvShowsCatalog.Web.Services
             
             bool isThereContent = _contentService.HasChildren(allTvShowsContentNodeId);
 
-            return (isThereContent, allTvShowsContentNodeId);
+            return new ImportDecision
+            {
+                ShouldRunImport = !isThereContent,
+                AllTvShowsContentNodeId = allTvShowsContentNodeId
+            };
         }
     }
 }
