@@ -15,28 +15,30 @@ namespace TvShowsCatalog.Web.Services
     public class TvMazeService : ITvMazeService
     {
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly ILogger<TvMazeService> _logger;
 
-        public TvMazeService(IHttpClientFactory httpClientFactory)
+        public TvMazeService(IHttpClientFactory httpClientFactory, ILogger<TvMazeService> logger)
         {
             _httpClientFactory = httpClientFactory;
+            _logger = logger;
         }
 
         // Simplified version to just get the first page. No error handling, no nothing.
 
-        public async Task<IEnumerable<TvMazeModel>> GetAllAsync()
-        {
-            var request = new HttpRequestMessage(HttpMethod.Get, "https://api.tvmaze.com/shows?page=0");
-            var client = HttpClientFactory.Create();
-            var response = await client.SendAsync(request);
-            var jsonString = await response.Content.ReadAsStreamAsync();
-            var allTvShows = await JsonSerializer.DeserializeAsync<List<TvMazeModel>>(jsonString);
-            return allTvShows;
-        }
+        //public async Task<IEnumerable<TvMazeModel>> GetAllAsync()
+        //{
+        //    var request = new HttpRequestMessage(HttpMethod.Get, "https://api.tvmaze.com/shows?page=0");
+        //    var client = HttpClientFactory.Create();
+        //    var response = await client.SendAsync(request);
+        //    var jsonString = await response.Content.ReadAsStreamAsync();
+        //    var allTvShows = await JsonSerializer.DeserializeAsync<List<TvMazeModel>>(jsonString);
+        //    return allTvShows;
+        //}
 
         // Build on the one below to iterate through all tvmaze pages and deserialize all tv shows.
         // Remember to inject ILogger
 
-        /*
+
         public async Task<IEnumerable<TvMazeModel>> GetAllAsync()
         {
             var allTvShows = new List<TvMazeModel>();
@@ -84,7 +86,6 @@ namespace TvShowsCatalog.Web.Services
 
             return allTvShows;
         }
-        */
         
     }
 }

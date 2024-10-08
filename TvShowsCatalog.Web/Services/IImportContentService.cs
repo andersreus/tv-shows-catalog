@@ -11,7 +11,7 @@ namespace TvShowsCatalog.Web.Services
 {
     public interface IImportContentService
     {
-        IEnumerable<TvMazeModel> ImportContent(int parentKey);
+        Task<IEnumerable<TvMazeModel>> ImportContent(int parentKey);
         void CreateContent(TvMazeModel tvshow, IMedia media, int allTvShowsContentNodeId, string[] cultures, IContentType tvShowContentType);
         ImportDecision ShouldRunImport();
 	}

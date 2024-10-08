@@ -1,4 +1,5 @@
-﻿using TvShowsCatalog.Web.Helpers;
+﻿using Microsoft.Extensions.Logging;
+using TvShowsCatalog.Web.Helpers;
 using TvShowsCatalog.Web.Models.ApiModels;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Scoping;
@@ -14,20 +15,21 @@ namespace TvShowsCatalog.Web.Services
         private readonly IImportMediaService _importMediaService;
         private readonly ICoreScopeProvider _coreScopeProvider;
         private readonly IContentTypeService _contentTypeService;
+        private readonly ILogger<ImportContentService> _logger;
 
-        public ImportContentService(IContentService contentService, ITvMazeService tVMazeService, IImportMediaService importMediaService, ICoreScopeProvider coreScopeProvider, IContentTypeService contentTypeService)
+        public ImportContentService(IContentService contentService, ITvMazeService tVMazeService, IImportMediaService importMediaService, ICoreScopeProvider coreScopeProvider, IContentTypeService contentTypeService, ILogger<ImportContentService> logger)
         {
             _contentService = contentService;
             _tvMazeService = tVMazeService;
             _importMediaService = importMediaService;
             _coreScopeProvider = coreScopeProvider;
             _contentTypeService = contentTypeService;
-		}
+            _logger = logger;
+        }
 
-        // pass in IMedia object
-		public void CreateContent(TvMazeModel tvshow, IMedia media, int allTvShowsContentNodeId, string[] cultures, IContentType tvShowContentType)
+        // TODO: CreateOrUpdateContent?
+        public void CreateContent(TvMazeModel tvshow, IMedia media, int allTvShowsContentNodeId, string[] cultures, IContentType tvShowContentType)
 		{
-            // need tvshows node id, have homepage now as well
 			var node = _contentService.Create($"{tvshow.Name}", allTvShowsContentNodeId, "tVShow");
 			node.SetValue("showSummary", $"{tvshow.Summary}");
 
@@ -36,7 +38,7 @@ namespace TvShowsCatalog.Web.Services
                 node.SetValue("showImage", media.GetUdi().ToString());
             }
 
-            // Sets template for the nodes all can be rendered out of the box.
+            // Set template for each node.
             var template = tvShowContentType.AllowedTemplates.FirstOrDefault(t => t.Alias == "show");
             if (template != null)
             {
@@ -47,24 +49,36 @@ namespace TvShowsCatalog.Web.Services
 			_contentService.Publish(node, cultures);
 		}
 
-		// TODO: Check for updated/added tvshows?
-
-		public IEnumerable<TvMazeModel> ImportContent(int allTvShowsContentNodeId)
+		public async Task<IEnumerable<TvMazeModel>> ImportContent(int allTvShowsContentNodeId)
         {
-            var allTvShows = _tvMazeService.GetAllAsync().GetAwaiter().GetResult();
+            var allTvShows = await _tvMazeService.GetAllAsync();
             var cultures = Array.Empty<string>();
             var tvShowContentType = _contentTypeService.Get("tvShow");
 
+            const int batchSize = 1000;
+            var totalshows = allTvShows.Count();
+            var currentIndex = 0;
+
 			using ICoreScope scope = _coreScopeProvider.CreateCoreScope();
 
-			foreach (var show in allTvShows)
+            while (currentIndex < totalshows)
             {
-				var media = _importMediaService.ImportMediaAsync(show).GetAwaiter().GetResult();
-                // Update rootContentId for the tvshows node id
-				CreateContent(show, media, allTvShowsContentNodeId, cultures, tvShowContentType);
-			}
-			scope.Complete();
-
+                var batch = allTvShows.Skip(currentIndex).Take(batchSize).ToList();
+                foreach (var show in batch)
+                {
+                    try
+                    {
+                        var media = await _importMediaService.ImportMediaAsync(show);
+                        CreateContent(show, media, allTvShowsContentNodeId, cultures, tvShowContentType);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, $"Error importing TV show {show.Name}", ex.Message);
+                    }
+                }
+                currentIndex += batchSize;
+                scope.Complete(); // Complete the current batch transacion with db
+            }
 			return allTvShows;
         }
 

@@ -36,7 +36,7 @@ namespace TvShowsCatalog.Web.UI
                 {
                     _logger.LogInformation("Running tvshow import for parent node with id {RootId}", importDecision.AllTvShowsContentNodeId);
 
-                    var importedItems = _importContentService.ImportContent(importDecision.AllTvShowsContentNodeId);
+                    var importedItems = await _importContentService.ImportContent(importDecision.AllTvShowsContentNodeId);
 
                     _logger.LogInformation("Imported {Count} tvshows at {Time}", importedItems.Count(), DateTime.UtcNow);
                 }
@@ -55,7 +55,6 @@ namespace TvShowsCatalog.Web.UI
                 // No ElapsedSeconds?
                 _logger.LogInformation("Tvshow import job completed in {ElapsedMilliseconds} ms at {EndTime}", stopwatch.ElapsedMilliseconds, DateTime.UtcNow);
             }
-
         }
     }
 }
