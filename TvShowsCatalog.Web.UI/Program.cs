@@ -14,7 +14,6 @@ builder.CreateUmbracoBuilder()
     .SetCustomMemberLoginPath()
 .Build();
 
-// Is it best practive to register DbContext before creating umbracobuilder and adding services above?
 builder.Services.AddDbContext<ReviewContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("umbracoDbDSN")));
 
