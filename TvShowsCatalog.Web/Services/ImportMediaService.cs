@@ -24,7 +24,6 @@ namespace TvShowsCatalog.Web.Services
 		private readonly HttpClient _httpClient;
 		private readonly ICoreScopeProvider _coreScopeProvider;
 
-
 		public ImportMediaService(IMediaService mediaService,MediaFileManager mediaFileManager, IShortStringHelper shortStringHelper, IContentTypeBaseServiceProvider contentTypeBaseServiceProvider, MediaUrlGeneratorCollection mediaUrlGenerators, IHttpClientFactory httpClientFactory, ILogger<ImportMediaService> logger, HttpClient httpClient, ICoreScopeProvider coreScopeProvider)
         {
              _mediaService = mediaService;
@@ -56,42 +55,51 @@ namespace TvShowsCatalog.Web.Services
 
 		public async Task<IMedia> ImportMediaAsync(TvMazeModel tvshow)
 		{
-			// Added a check if media is already imported? If content is gone but media is still there in the media section.
 			if (tvshow == null || string.IsNullOrEmpty(tvshow.Image?.Original))
 			{
 				return null;
 			}
 
-			try
+            // Check if media already exists - GetPagedChildren parameters?
+            /*
+			var fileName = $"{tvshow.Name}{GetImageFileFormat(tvshow.Image?.Original)}";
+
+			var existingMedia = _mediaService.GetPagedChildren(CreateMediaRootFolder().Id)
+				.FirstOrDefault(m => m.Name == fileName);
+
+			if (existingMedia != null)
+			{ return existingMedia; }
+			*/
+
+            var mediaFolder = CreateMediaRootFolder();
+            var fileFormat = GetImageFileFormat($"{tvshow.Image?.Original}");
+            var fileName = $"{tvshow.Name}{fileFormat}";
+
+            try
 			{
-				var mediaFolder = CreateMediaRootFolder();
-				var fileFormat = GetImageFileFormat($"{tvshow.Image?.Original}");
-				var fileName = $"{tvshow.Name}{fileFormat}";
-				// using is for proper disposal of the web client
-				using (var client = HttpClientFactory.Create())
-				{
-					var response = await client.GetAsync(tvshow.Image?.Original);
-					if (!response.IsSuccessStatusCode)
-					{
-						return null;
-					}
+				// "using" is for proper disposal of the web client
+				using var client = _httpClientFactory.CreateClient();
+                var response = await client.GetAsync(tvshow.Image?.Original);
 
-					using (var stream = await response.Content.ReadAsStreamAsync())
-					{
-						using ICoreScope scope = _coreScopeProvider.CreateCoreScope();
-						var media = _mediaService.CreateMedia(fileName, mediaFolder.Id, Constants.Conventions.MediaTypes.Image);
-						media.SetValue(_mediaFileManager, _mediaUrlGeneratorCollection, _shortStringHelper, _contentTypeBaseServiceProvider, Constants.Conventions.Media.File, fileName, stream);
+                if (!response.IsSuccessStatusCode)
+                {
+                    return null;
+                }
 
-						_mediaService.Save(media);
-						scope.Complete();
+				using var stream = await response.Content.ReadAsStreamAsync();
+                using ICoreScope scope = _coreScopeProvider.CreateCoreScope();
 
-						return media;
-					}
-				}
+                var media = _mediaService.CreateMedia(fileName, mediaFolder.Id, Constants.Conventions.MediaTypes.Image);
+                media.SetValue(_mediaFileManager, _mediaUrlGeneratorCollection, _shortStringHelper, _contentTypeBaseServiceProvider, Constants.Conventions.Media.File, fileName, stream);
+
+                _mediaService.Save(media);
+				scope.Complete();
+
+                return media;
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError("Error getting media imported: ", ex);
+				_logger.LogError($"Error importing media for TV show {tvshow.Name}", ex.Message);
 				return null;
 			}
 		}
@@ -102,22 +110,57 @@ namespace TvShowsCatalog.Web.Services
 			return fileFormat;
 		}
 
-		//public IEnumerable<IMedia> ImportBulkMedia(IEnumerable<TvMazeModel> tvshows)
-		//{
-		//	using ICoreScope scope = _coreScopeProvider.CreateCoreScope();
-		//	List<IMedia> mediaList = new List<IMedia>();
+		// Bulk import of media to avoid to many requests
+		// Remember to call ImportBulkMediaAsync from ImportContent instead 
+		/*
+		public async Task<IEnumerable<IMedia>> ImportBulkMediaAsync(IEnumerable<TvMazeModel> tvshows)
+		{
+            List<IMedia> mediaList = new List<IMedia>();
+			var mediaFolder = CreateMediaRootFolder();
 
-		//	foreach (var show in tvshows)
-		//	{
-		//		var image = ImportMediaAsync(show).GetAwaiter().GetResult();
-		//		if (image != null)
-		//		{
-		//			mediaList.Add(image);
-		//		}
-				
-		//	}
-		//	scope.Complete();
-		//	return mediaList;
-		//}
+            foreach (var show in tvshows)
+            {
+				if (string.IsNullOrEmpty(show.Image?.Original))
+				{
+					 in case tvshow has no image
+					mediaList.Add(null);
+					continue;
+				}
+
+				try
+				{
+                    var fileFormat = GetImageFileFormat($"{show.Image?.Original}");
+                    var fileName = $"{show.Name}{fileFormat}";
+
+					using (var client = _httpClientFactory.CreateClient())
+					{
+						var response = await client.GetAsync(show.Image?.Original);
+
+                        if (!response.IsSuccessStatusCode)
+                        {
+                            mediaList.Add(null);
+                            continue;
+                        }
+
+						using (var stream = await response.Content.ReadAsStreamAsync())
+						{
+                            using ICoreScope scope = _coreScopeProvider.CreateCoreScope();
+                            var media = _mediaService.CreateMedia(fileName, mediaFolder.Id, Constants.Conventions.MediaTypes.Image);
+                            media.SetValue(_mediaFileManager, _mediaUrlGeneratorCollection, _shortStringHelper, _contentTypeBaseServiceProvider, Constants.Conventions.Media.File, fileName, stream);
+                            _mediaService.Save(media);
+                            scope.Complete();
+							mediaList.Add(media);
+                        }
+                    }
+                }
+				catch (Exception ex)
+				{
+					_logger.LogError($"Error getting media for show {show.Name}", ex.Message);
+                    mediaList.Add(null);
+                }
+            }
+			return mediaList;
+		}
+		*/
 	}
 }
