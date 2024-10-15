@@ -23,32 +23,14 @@ namespace TvShowsCatalog.Web.Services
             _logger = logger;
         }
 
-        // Simplified version to just get the first page. No error handling, no nothing.
-
-        //public async Task<IEnumerable<TvMazeModel>> GetAllAsync()
-        //{
-        //    var request = new HttpRequestMessage(HttpMethod.Get, "https://api.tvmaze.com/shows?page=0");
-        //    var client = HttpClientFactory.Create();
-        //    var response = await client.SendAsync(request);
-        //    var jsonString = await response.Content.ReadAsStreamAsync();
-        //    var allTvShows = await JsonSerializer.DeserializeAsync<List<TvMazeModel>>(jsonString);
-        //    return allTvShows;
-        //}
-
-        // Build on the one below to iterate through all tvmaze pages and deserialize all tv shows.
-        // Remember to inject ILogger
-
-
         public async Task<IEnumerable<TvMazeModel>> GetAllAsync()
         {
             var allTvShows = new List<TvMazeModel>();
             int page = 0;
-            int maxPages = 10; // This is just for testing. Looping through all pages gives sql issues.
 
             try
             {
-                //while (true)
-                while (page < maxPages)
+                while (true) // Keep going until no more data can be fetched
                 {
                     // Create request for current page on tvmaze
                     var client = _httpClientFactory.CreateClient();
@@ -73,15 +55,22 @@ namespace TvShowsCatalog.Web.Services
 
                     // Continue to the next page
                     page++;
+
+                    // 100ms
+                    await Task.Delay(100);
                 }
             }
             catch (HttpRequestException ex)
             {
-                _logger.LogError("Request error: ", ex);
+                _logger.LogError("Request error doing tvmaze api fetch: ", ex);
             }
             catch (JsonException ex)
             {
-                _logger.LogError("JSON deserialization error: ", ex);
+                _logger.LogError("JSON deserialization error doing tvmaze api fetch: ", ex);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Error occured doing tvmaze api fetch.", ex);
             }
 
             return allTvShows;
