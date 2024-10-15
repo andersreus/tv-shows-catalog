@@ -5,6 +5,7 @@ using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Scoping;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Extensions;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace TvShowsCatalog.Web.Services
 {
@@ -49,35 +50,42 @@ namespace TvShowsCatalog.Web.Services
 			_contentService.Publish(node, cultures);
 		}
 
-		public async Task<IEnumerable<TvMazeModel>> ImportContent(int allTvShowsContentNodeId)
+		public async Task<IEnumerable<TvMazeModel>> ImportContentAsync(int allTvShowsContentNodeId)
         {
             var allTvShows = await _tvMazeService.GetAllAsync();
             var cultures = Array.Empty<string>();
             var tvShowContentType = _contentTypeService.Get("tvShow");
 
-            const int batchSize = 1000;
+            // Break down alltvshows into manageable batches
+            const int batchSize = 500;
             var totalshows = allTvShows.Count();
+            // Tracks current batch
             var currentIndex = 0;
-
-			using ICoreScope scope = _coreScopeProvider.CreateCoreScope();
 
             while (currentIndex < totalshows)
             {
+                // Bypass currentIndex and return the next batchsize to the list "batch"
                 var batch = allTvShows.Skip(currentIndex).Take(batchSize).ToList();
-                foreach (var show in batch)
+                using (ICoreScope scope = _coreScopeProvider.CreateCoreScope(autoComplete: true)) // new scope/transaction pr batch
                 {
-                    try
+                    foreach (var show in batch)
                     {
-                        var media = await _importMediaService.ImportMediaAsync(show);
-                        CreateContent(show, media, allTvShowsContentNodeId, cultures, tvShowContentType);
+                        try
+                        {
+                            var media = await _importMediaService.ImportMediaAsync(show);
+                            CreateContent(show, media, allTvShowsContentNodeId, cultures, tvShowContentType);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, $"Error importing TV show {show.Name}", ex.Message);
+                        }
                     }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, $"Error importing TV show {show.Name}", ex.Message);
-                    }
+                    scope.Complete(); // Transaction completed = save all changes for that batch to the db.
                 }
+                // Add batchSize(500) to the currentIndex
                 currentIndex += batchSize;
-                scope.Complete(); // Complete the current batch transacion with db
+                // 100ms - to avoid overwhelming system, might not be needed.
+                await Task.Delay(100); 
             }
 			return allTvShows;
         }

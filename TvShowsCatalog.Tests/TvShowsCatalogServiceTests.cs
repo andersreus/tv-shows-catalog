@@ -122,7 +122,7 @@ namespace TvShowsCatalog.Tests
                 Assert.Fail($"Failed to save content type: {ex.Message}");
             }
 
-            var importedContent = _importContentService.ImportContent(-1);
+            var importedContent = _importContentService.ImportContentAsync(-1);
 
 			int count = _contentService.Count("tVShow");
 			Assert.AreEqual(240, count);
@@ -169,7 +169,7 @@ namespace TvShowsCatalog.Tests
 
 			_contentTypeService.Save(contentType);
 
-            var importedContent = _importContentService.ImportContent(-1);
+            var importedContent = _importContentService.ImportContentAsync(-1);
 
 			long totalRecords;
 			var contentNodes = _contentService.GetPagedChildren(-1, 0, int.MaxValue, out totalRecords);
