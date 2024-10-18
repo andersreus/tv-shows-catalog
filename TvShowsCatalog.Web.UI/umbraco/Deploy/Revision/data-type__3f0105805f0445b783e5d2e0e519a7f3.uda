@@ -1,0 +1,20 @@
+{
+  "Name": "Genres",
+  "EditorAlias": "Umbraco.BlockList",
+  "EditorUiAlias": "Umb.PropertyEditorUi.BlockList",
+  "Configuration": {
+    "blocks": [
+      {
+        "contentElementTypeKey": "db2fae15-ca08-45af-958b-4f6431a833e2"
+      }
+    ]
+  },
+  "Udi": "umb://data-type/3f0105805f0445b783e5d2e0e519a7f3",
+  "Dependencies": [
+    {
+      "Udi": "umb://document-type/db2fae15ca0845af958b4f6431a833e2"
+    }
+  ],
+  "__type": "Umbraco.Deploy.Infrastructure,Umbraco.Deploy.Infrastructure.Artifacts.DataTypeArtifact",
+  "__version": "14.1.4"
+}

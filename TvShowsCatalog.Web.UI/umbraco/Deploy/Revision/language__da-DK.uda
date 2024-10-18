@@ -1,0 +1,9 @@
+{
+  "Name": "Danish (Denmark)",
+  "Alias": "da-DK",
+  "IsoCode": "da-DK",
+  "Udi": "umb://language/da-DK",
+  "Dependencies": [],
+  "__type": "Umbraco.Deploy.Infrastructure,Umbraco.Deploy.Infrastructure.Artifacts.LanguageArtifact",
+  "__version": "14.1.4"
+}

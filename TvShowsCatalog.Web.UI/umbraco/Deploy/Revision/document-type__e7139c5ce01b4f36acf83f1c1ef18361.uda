@@ -9,6 +9,7 @@
   "Icon": "icon-tv-old color-yellow",
   "Thumbnail": "folder.png",
   "Permissions": {
+    "AllowVaryingByCulture": true,
     "AllowedChildContentTypes": []
   },
   "Parent": "umb://document-type-container/3026b6a90e864d27b8ef618db53a45fb",
@@ -24,7 +25,8 @@
           "Alias": "showSummary",
           "DataType": "umb://data-type/ca90c9500aff4e72b976a30b1ac57dad",
           "Name": "Show Summary",
-          "SortOrder": 1
+          "SortOrder": 1,
+          "VariesByCulture": true
         },
         {
           "Key": "c6cd7283-5cf0-43ce-bf70-f9fba421c2c3",
@@ -32,6 +34,12 @@
           "DataType": "umb://data-type/ad9f0cf2bda245d59ea1a63cfc873fd3",
           "Name": "Show Image",
           "SortOrder": 2
+        },
+        {
+          "Key": "ed395b21-f9fd-4be5-944c-ff846644c8e9",
+          "Alias": "genres",
+          "DataType": "umb://data-type/3f0105805f0445b783e5d2e0e519a7f3",
+          "Name": "Genres"
         }
       ]
     }
@@ -39,6 +47,10 @@
   "PropertyTypes": [],
   "Udi": "umb://document-type/e7139c5ce01b4f36acf83f1c1ef18361",
   "Dependencies": [
+    {
+      "Udi": "umb://data-type/3f0105805f0445b783e5d2e0e519a7f3",
+      "Ordering": true
+    },
     {
       "Udi": "umb://data-type/ad9f0cf2bda245d59ea1a63cfc873fd3",
       "Ordering": true
@@ -57,5 +69,5 @@
     }
   ],
   "__type": "Umbraco.Deploy.Infrastructure,Umbraco.Deploy.Infrastructure.Artifacts.ContentType.DocumentTypeArtifact",
-  "__version": "14.1.1"
+  "__version": "14.1.4"
 }
