@@ -9,9 +9,6 @@ namespace TvShowsCatalog.Web.Models.ApiModels
 {
     public class TvMazeModel
     {
-        // GET - https://api.tvmaze.com/shows?page=0
-        // TODO: Add more properties based on postman response. Image, genre etc
-
         [JsonPropertyName("id")]
         public int Id { get; set; }
         [JsonPropertyName("name")]
@@ -20,6 +17,7 @@ namespace TvShowsCatalog.Web.Models.ApiModels
         public string? Summary { get; set; }
         [JsonPropertyName("image")]
         public TvMazeImageModel? Image { get; set; }
-
+        [JsonPropertyName("genres")]
+        public string[] Genres { get; set; }
     }
 }
