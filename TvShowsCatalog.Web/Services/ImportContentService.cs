@@ -1,12 +1,15 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Text.Json.Serialization;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Logging;
 using TvShowsCatalog.Web.Helpers;
 using TvShowsCatalog.Web.Models.ApiModels;
+using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Models.Blocks;
 using Umbraco.Cms.Core.Scoping;
+using Umbraco.Cms.Core.Serialization;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Extensions;
-using static System.Formats.Asn1.AsnWriter;
 
 namespace TvShowsCatalog.Web.Services
 {
@@ -18,8 +21,9 @@ namespace TvShowsCatalog.Web.Services
         private readonly ICoreScopeProvider _coreScopeProvider;
         private readonly IContentTypeService _contentTypeService;
         private readonly ILogger<ImportContentService> _logger;
+        private readonly IJsonSerializer _serializer;
 
-        public ImportContentService(IContentService contentService, ITvMazeService tVMazeService, IImportMediaService importMediaService, ICoreScopeProvider coreScopeProvider, IContentTypeService contentTypeService, ILogger<ImportContentService> logger)
+        public ImportContentService(IContentService contentService, ITvMazeService tVMazeService, IImportMediaService importMediaService, ICoreScopeProvider coreScopeProvider, IContentTypeService contentTypeService, ILogger<ImportContentService> logger, IJsonSerializer serializer)
         {
             _contentService = contentService;
             _tvMazeService = tVMazeService;
@@ -27,17 +31,18 @@ namespace TvShowsCatalog.Web.Services
             _coreScopeProvider = coreScopeProvider;
             _contentTypeService = contentTypeService;
             _logger = logger;
+            _serializer = serializer;
         }
 
         // TODO: CreateOrUpdateContent?
         public void CreateContent(TvMazeModel tvshow, IMedia media, int allTvShowsContentNodeId, string[] cultures, IContentType tvShowContentType)
 		{
-			var node = _contentService.Create($"{tvshow.Name}", allTvShowsContentNodeId, "tVShow");
-			node.SetValue("showSummary", $"{tvshow.Summary}");
+			var tvShowNode = _contentService.Create(tvshow.Name, allTvShowsContentNodeId, "tVShow");
+			tvShowNode.SetValue("showSummary", tvshow.Summary ?? "No summary for this TV show");
 
             if (media != null)
             {
-                node.SetValue("showImage", media.GetUdi().ToString());
+                tvShowNode.SetValue("showImage", media.GetUdi().ToString());
             }
             
             List<BlockListModel> genreBlocks = new List<BlockListModel>();
@@ -47,18 +52,43 @@ namespace TvShowsCatalog.Web.Services
                 node.SetValue("genres",tvshow.Genres);
             }
 
-            // Set template for each node.
+            // Assign template to each individual node.
             var template = tvShowContentType.AllowedTemplates.FirstOrDefault(t => t.Alias == "show");
             if (template != null)
             {
-                node.TemplateId = template.Id;
+                tvShowNode.TemplateId = template.Id;
+            }
+            else
+            {
+                _logger.LogWarning($"Could not find show template for this TV show, {tvshow.Name}");
             }
 
-            _contentService.Save(node);
-			_contentService.Publish(node, cultures);
+            int index = 0;
+            IContentType? elementContentType = _contentTypeService.Get("genre");
+            var elementData = new List<BlockListElementData>();
+            foreach (var genre in tvshow.Genres)
+            {
+                var contentUdi = Udi.Create(Constants.UdiEntityType.Element, Guid.NewGuid());
+                elementData.Add(new BlockListElementData(elementContentType.Key, contentUdi)
+                {
+                    Data = new Dictionary<string, object>
+                    {
+                        { "title", genre},
+                        { "indexNumber", index.ToString() },
+                    }
+                });
+                index++;
+            }
+            
+            var propertyValue = _serializer.Serialize(elementData);
+            
+            tvShowNode.SetValue("genres", propertyValue);
+
+            _contentService.Save(tvShowNode);
+			_contentService.Publish(tvShowNode, cultures);
 		}
 
-		public async Task<IEnumerable<TvMazeModel>> ImportContentAsync(int allTvShowsContentNodeId)
+		public async Task<IEnumerable<TvMazeModel>> ImportContentAsync(int allTvShowsContentNodeId, int importAmount)
         {
             var allTvShows = await _tvMazeService.GetAllAsync();
             var cultures = Array.Empty<string>();
@@ -66,11 +96,10 @@ namespace TvShowsCatalog.Web.Services
 
             // Break down alltvshows into manageable batches
             const int batchSize = 500;
-            var totalshows = allTvShows.Count();
             // Tracks current batch
             var currentIndex = 0;
 
-            while (currentIndex < totalshows)
+            while (currentIndex < importAmount)
             {
                 // Bypass currentIndex and return the next batchsize to the list "batch"
                 var batch = allTvShows.Skip(currentIndex).Take(batchSize).ToList();
@@ -116,6 +145,24 @@ namespace TvShowsCatalog.Web.Services
                 ShouldRunImport = !isThereContent,
                 AllTvShowsContentNodeId = allTvShowsContentNodeId
             };
+        }
+        
+        private class BlockListElementData
+        {
+            public BlockListElementData(Guid contentTypeKey, Udi udi)
+            {
+                ContentTypeKey = contentTypeKey;
+                Udi = udi;
+            }
+
+            [JsonPropertyName("contentTypeKey")]
+            public Guid ContentTypeKey { get; }
+
+            [JsonPropertyName("udi")]
+            public Udi Udi { get; }
+
+            [JsonExtensionData]
+            public Dictionary<string, object>? Data { get; set;}
         }
     }
 }

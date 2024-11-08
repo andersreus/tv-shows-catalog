@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using System.Reflection.Metadata;
 using AutoFixture;
 using Microsoft.Extensions.DependencyInjection;
 using NPoco;
@@ -11,6 +13,10 @@ using Umbraco.Cms.Tests.Common.Testing;
 using Umbraco.Cms.Tests.Integration.Testing;
 using Umbraco.Cms.Core;
 using Bogus.DataSets;
+using Lucene.Net.Search;
+using Microsoft.Extensions.Logging;
+using Umbraco.Cms.Core.PropertyEditors;
+using Umbraco.Cms.Core.Serialization;
 
 namespace TvShowsCatalog.Tests
 {
@@ -24,9 +30,13 @@ namespace TvShowsCatalog.Tests
 		private IImportContentService _importContentService;
 		private IContentTypeService _contentTypeService;
 		private IContentService _contentService;
-		private IDataTypeService _dataTypeService;
-		private IShortStringHelper _shortStringHelper;
+		//private IDataTypeService _dataTypeService;
+		//private IShortStringHelper _shortStringHelper;
 		private ITemplateService _templateService;
+		
+		private IConfigurationEditorJsonSerializer ConfigurationEditorJsonSerializer => GetRequiredService<IConfigurationEditorJsonSerializer>();
+		private IDataTypeService DataTypeService => GetRequiredService<IDataTypeService>();
+		protected PropertyEditorCollection PropertyEditorCollection => GetRequiredService<PropertyEditorCollection>();
 
 		[SetUp]
 		public new void Setup()
@@ -37,8 +47,8 @@ namespace TvShowsCatalog.Tests
 			_importContentService = GetRequiredService<IImportContentService>();
             _contentTypeService = GetRequiredService<IContentTypeService>();
             _contentService = GetRequiredService<IContentService>();
-			_dataTypeService = GetRequiredService<IDataTypeService>();
-			_shortStringHelper = GetRequiredService<IShortStringHelper>();
+			//_dataTypeService = GetRequiredService<IDataTypeService>();
+			//_shortStringHelper = GetRequiredService<IShortStringHelper>();
 			_templateService = GetRequiredService<ITemplateService>();
 		}
 
@@ -50,14 +60,14 @@ namespace TvShowsCatalog.Tests
 		}
 
 		[Test]
-		public async Task GetAllAsync_ReturnsListOfTvMazeModelObjects()
+		public async Task Return_All_TvMazeModel_Objects()
 		{
 			var allShows = await _tvMazeService.GetAllAsync();
 			Assert.IsTrue(allShows.Any());
 		}
 
 		[Test]
-		public async Task ImportMedia_CreateAndSafeASingleMediaInBackoffice()
+		public async Task Create_A_Single_Media_In_Backoffice()
 		{
 			var allShows = await _tvMazeService.GetAllAsync();
 
@@ -81,17 +91,43 @@ namespace TvShowsCatalog.Tests
 
 		//	Assert.AreEqual(240, count);
 		//}
-
-		[Test]
-		public void ImportContent_CreateAndSaveAllTvShowsAsNodesInBackoffice()
+		
+		[ Test]
+		public async Task Create_All_TvShows_As_Content_In_Backoffice()
         {
+<<<<<<< HEAD
             // TODO: Add the block element (textstring genre) to the blocklist
             var tvShowBuilder = new ContentTypeBuilder();
 			var tvShowContentType = (ContentType)tvShowBuilder
+=======
+	        var genreElementType = new ContentTypeBuilder()
+		        .WithAlias("genre")
+		        .WithName("Genre")
+		        .WithIsElement(true)
+		        .AddPropertyType()
+		        .WithAlias("indexNumber")
+		        .WithName("Index Number")
+		        .WithDataTypeId(Constants.DataTypes.Textbox)
+		        .WithPropertyEditorAlias(Constants.PropertyEditors.Aliases.TextBox)
+		        .WithValueStorageType(ValueStorageType.Nvarchar)
+		        .Done()
+		        .AddPropertyType()
+		        .WithAlias("title")
+		        .WithName("Title")
+		        .WithDataTypeId(Constants.DataTypes.Textbox)
+		        .WithPropertyEditorAlias(Constants.PropertyEditors.Aliases.TextBox)
+		        .WithValueStorageType(ValueStorageType.Nvarchar)
+		        .Done()
+		        .Build();
+	        _contentTypeService.Save(genreElementType);
+	        var nestedBlockListDataType = await CreateBlockListDataType(genreElementType);
+	        
+            var tvShowContentType = new ContentTypeBuilder()
+>>>>>>> 84e517f33f820b9cd60173ff4246b42e11ef845e
 				.WithAlias("tVShow")
 				.WithName("TV Show")
-				.WithSortOrder(1)
 				.AddPropertyType()
+<<<<<<< HEAD
 				.WithPropertyEditorAlias(Constants.PropertyEditors.Aliases.BlockList)
 				.WithValueStorageType(ValueStorageType.Nvarchar)
 				.WithDataTypeId(12345)
@@ -101,21 +137,40 @@ namespace TvShowsCatalog.Tests
 				.Done()
 				.AddPropertyType()
 				.WithPropertyEditorAlias(Constants.PropertyEditors.Aliases.RichText)
+=======
+				.WithAlias("genres")
+				.WithName("Genres")
+				.WithDataTypeId(nestedBlockListDataType.Id)
+				.WithPropertyEditorAlias(Constants.PropertyEditors.Aliases.BlockList)
+>>>>>>> 84e517f33f820b9cd60173ff4246b42e11ef845e
 				.WithValueStorageType(ValueStorageType.Ntext)
-				.WithAlias("showSummary")
-				.WithName("Show Summary")
-				.WithSortOrder(2)
-				.WithDataTypeId(Constants.DataTypes.RichtextEditor)
 				.Done()
 				.AddPropertyType()
-				.WithPropertyEditorAlias(Constants.PropertyEditors.Aliases.MediaPicker3)
-				.WithValueStorageType(ValueStorageType.Nvarchar)
+				.WithAlias("showSummary")
+				.WithName("Show Summary")
+<<<<<<< HEAD
+				.WithSortOrder(2)
+=======
+>>>>>>> 84e517f33f820b9cd60173ff4246b42e11ef845e
+				.WithDataTypeId(Constants.DataTypes.RichtextEditor)
+				.WithPropertyEditorAlias(Constants.PropertyEditors.Aliases.RichText)
+				.WithValueStorageType(ValueStorageType.Ntext)
+				.Done()
+				.AddPropertyType()
 				.WithAlias("showImage")
 				.WithName("Show Image")
+<<<<<<< HEAD
 				.WithSortOrder(3)
+=======
+				// .WithDataTypeId(Constants.DataTypes.)
+				.WithPropertyEditorAlias(Constants.PropertyEditors.Aliases.MediaPicker3)
+				.WithValueStorageType(ValueStorageType.Nvarchar)
+>>>>>>> 84e517f33f820b9cd60173ff4246b42e11ef845e
 				.Done()
 				.Build();
+			_contentTypeService.Save(tvShowContentType);
 
+<<<<<<< HEAD
 			var genreBuilder = new ContentTypeBuilder();
 	        var genreContentType = (ContentType)genreBuilder
 				.WithAlias("genre")
@@ -160,10 +215,86 @@ namespace TvShowsCatalog.Tests
 
 			int count = _contentService.Count("tVShow");
 			Assert.AreEqual(76331, count);
+=======
+			var parentId = -1;
+			var importAmount = 1000;
+            var importedContent = await _importContentService.ImportContentAsync(parentId, importAmount);
+
+			int count = _contentService.Count("tVShow");
+			
+			Assert.AreEqual(importAmount, count);
+>>>>>>> 84e517f33f820b9cd60173ff4246b42e11ef845e
         }
 
 		[Test]
-		public async Task ImportContent_CheckIfCreatedContentNodesHasTemplateAssigned()
+		public async Task Create_All_TvShows_As_Content_In_Backoffice_With_Variants()
+        {
+	        var genreElementType = new ContentTypeBuilder()
+		        .WithAlias("genre")
+		        .WithName("Genre")
+		        .WithIsElement(true)
+		        .WithContentVariation(ContentVariation.Culture)
+		        .AddPropertyType()
+		        .WithAlias("indexNumber")
+		        .WithName("Index Number")
+		        .WithDataTypeId(Constants.DataTypes.Textbox)
+		        .WithPropertyEditorAlias(Constants.PropertyEditors.Aliases.TextBox)
+		        .WithValueStorageType(ValueStorageType.Nvarchar)
+		        .WithVariations(ContentVariation.Nothing)
+		        .Done()
+		        .AddPropertyType()
+		        .WithAlias("title")
+		        .WithName("Title")
+		        .WithDataTypeId(Constants.DataTypes.Textbox)
+		        .WithPropertyEditorAlias(Constants.PropertyEditors.Aliases.TextBox)
+		        .WithValueStorageType(ValueStorageType.Nvarchar)
+		        .WithVariations(ContentVariation.Culture)
+		        .Done()
+		        .Build();
+	        _contentTypeService.Save(genreElementType);
+	        var nestedBlockListDataType = await CreateBlockListDataType(genreElementType);
+	        
+            var tvShowContentType = new ContentTypeBuilder()
+				.WithAlias("tVShow")
+				.WithName("TV Show")
+				.WithContentVariation(ContentVariation.Culture)
+				.AddPropertyType()
+				.WithAlias("genres")
+				.WithName("Genres")
+				.WithDataTypeId(nestedBlockListDataType.Id)
+				.WithPropertyEditorAlias(Constants.PropertyEditors.Aliases.BlockList)
+				.WithValueStorageType(ValueStorageType.Ntext)
+				.WithVariations(ContentVariation.Culture)
+				.Done()
+				.AddPropertyType()
+				.WithAlias("showSummary")
+				.WithName("Show Summary")
+				.WithDataTypeId(Constants.DataTypes.RichtextEditor)
+				.WithPropertyEditorAlias(Constants.PropertyEditors.Aliases.RichText)
+				.WithValueStorageType(ValueStorageType.Ntext)
+				.WithVariations(ContentVariation.Nothing)
+				.Done()
+				.AddPropertyType()
+				.WithAlias("showImage")
+				.WithName("Show Image")
+				// .WithDataTypeId(Constants.DataTypes.)
+				.WithPropertyEditorAlias(Constants.PropertyEditors.Aliases.MediaPicker3)
+				.WithValueStorageType(ValueStorageType.Nvarchar)
+				.WithVariations(ContentVariation.Nothing)
+				.Done()
+				.Build();
+			_contentTypeService.Save(tvShowContentType);
+
+			var parentId = -1;
+			var importAmount = 1000;
+            var importedContent = _importContentService.ImportContentAsync(parentId, importAmount);
+
+			int count = _contentService.Count("tVShow");
+			Assert.AreEqual(importAmount, count);
+        }
+
+		[Test]
+		public async Task Check_If_Content_Nodes_Has_Template()
 		{
 			var templateBuilder = new TemplateBuilder();
 			var template = (Template)templateBuilder
@@ -203,7 +334,9 @@ namespace TvShowsCatalog.Tests
 
 			_contentTypeService.Save(contentType);
 
-            var importedContent = _importContentService.ImportContentAsync(-1);
+			var parentId = -1;
+			var importAmount = 1000;
+            var importedContent = _importContentService.ImportContentAsync(parentId, importAmount);
 
 			long totalRecords;
 			var contentNodes = _contentService.GetPagedChildren(-1, 0, int.MaxValue, out totalRecords);
@@ -212,6 +345,31 @@ namespace TvShowsCatalog.Tests
 			{
 				Assert.IsNotNull(contentNode.TemplateId, $"Content node with name {contentNode.Name} does not have a template attached");
 			}
+		}
+		
+		// Help from source code -> BlockListElementLevelVariationTests.cs
+		private async Task<IDataType> CreateBlockListDataType(IContentType elementType)
+			=> await CreateBlockEditorDataType(
+				Constants.PropertyEditors.Aliases.BlockList,
+				new BlockListConfiguration.BlockConfiguration[]
+				{
+					new() { ContentElementTypeKey = elementType.Key, SettingsElementTypeKey = elementType.Key }
+				});
+		
+		protected async Task<IDataType> CreateBlockEditorDataType<T>(string propertyEditorAlias, T blocksConfiguration)
+		{
+			var dataType = new DataType(PropertyEditorCollection[propertyEditorAlias],
+				ConfigurationEditorJsonSerializer)
+			{
+				ConfigurationData = new Dictionary<string, object> { { "blocks", blocksConfiguration } },
+				Name = "My Block Editor",
+				DatabaseType = ValueStorageType.Ntext,
+				ParentId = Constants.System.Root,
+				CreateDate = DateTime.UtcNow
+			};
+			
+			await DataTypeService.CreateAsync(dataType, Constants.Security.SuperUserKey);
+			return dataType;
 		}
 	}
 }

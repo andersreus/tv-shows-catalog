@@ -21,6 +21,7 @@ namespace TvShowsCatalog.Web.UI.Twilio
         IHttpContextAccessor _httpContextAccessor;
 
         private readonly string? _serviceSid;
+        
         private readonly ILogger<AuthenticationSurfaceController> _logger;
         private readonly IHttpClientFactory _factory;
 
@@ -45,8 +46,12 @@ namespace TvShowsCatalog.Web.UI.Twilio
             _memberSignInManager = memberSignInManager;
             _httpContextAccessor = httpContextAccessor;
             
+<<<<<<< HEAD
             // Get ServiceSid differently in Rider from secrets.json! Use it in appsettings for now...
             //_serviceSid = configuration["SmsDataService:Twilio:ServiceSid"];
+=======
+            
+>>>>>>> 84e517f33f820b9cd60173ff4246b42e11ef845e
             _serviceSid = configuration["ServiceSid"];
             _logger = logger;
             _factory = factory;

@@ -3,8 +3,14 @@ using Serilog.Context;
 using TvShowsCatalog.Web.Data;
 using TvShowsCatalog.Web.UI;
 using Twilio;
+using Umbraco.Cms.Infrastructure.Services;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+if (builder.Environment.IsDevelopment())
+{
+    builder.Configuration.AddUserSecrets<Program>();
+}
 
 builder.CreateUmbracoBuilder()
     .AddBackOffice()
@@ -12,7 +18,7 @@ builder.CreateUmbracoBuilder()
     .AddDeliveryApi()
     .AddComposers()
     .SetCustomMemberLoginPath()
-.Build();
+    .Build();
 
 builder.Services.AddDbContext<ReviewContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("umbracoDbDSN")));
