@@ -21,7 +21,10 @@ WebApplication app = builder.Build();
 
 await app.BootUmbracoAsync();
 
-var config = app.Services.GetRequiredService<IConfiguration>();
+var config = new ConfigurationBuilder()
+    .AddUserSecrets<Program>()
+    .Build();
+
 var configPath = "SmsDataService:Twilio:";
 
 var accountSid = config[$"{configPath}AccountSid"];

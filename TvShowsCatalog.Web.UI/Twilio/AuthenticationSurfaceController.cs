@@ -44,8 +44,10 @@ namespace TvShowsCatalog.Web.UI.Twilio
             _memberManager = memberManager;
             _memberSignInManager = memberSignInManager;
             _httpContextAccessor = httpContextAccessor;
-
-            _serviceSid = configuration["SmsDataService:Twilio:ServiceSid"];
+            
+            // Get ServiceSid differently in Rider from secrets.json! Use it in appsettings for now...
+            //_serviceSid = configuration["SmsDataService:Twilio:ServiceSid"];
+            _serviceSid = configuration["ServiceSid"];
             _logger = logger;
             _factory = factory;
         }
@@ -58,7 +60,7 @@ namespace TvShowsCatalog.Web.UI.Twilio
         public async Task<IActionResult> Login(long member_number, string otp,
             string member_country_code, string redirect_url = "/")
         {
-            if (!string.IsNullOrWhiteSpace(member_country_code) &&
+            if (!string.IsNullOrWhiteSpace(member_country_code) &&  
                 member_number.ToString().Length > 3)
             {
                 string username = $"+{member_country_code}{member_number}";

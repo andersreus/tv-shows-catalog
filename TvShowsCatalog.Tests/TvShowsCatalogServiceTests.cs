@@ -29,7 +29,7 @@ namespace TvShowsCatalog.Tests
 		private ITemplateService _templateService;
 
 		[SetUp]
-		public void Setup()
+		public new void Setup()
 		{
 			_mediaService = GetRequiredService<IMediaService>();
 			_tvMazeService = GetRequiredService<ITvMazeService>();
@@ -85,17 +85,26 @@ namespace TvShowsCatalog.Tests
 		[Test]
 		public void ImportContent_CreateAndSaveAllTvShowsAsNodesInBackoffice()
         {
-            var builder = new ContentTypeBuilder();
-			var contentType = (ContentType)builder
+            // TODO: Add the block element (textstring genre) to the blocklist
+            var tvShowBuilder = new ContentTypeBuilder();
+			var tvShowContentType = (ContentType)tvShowBuilder
 				.WithAlias("tVShow")
 				.WithName("TV Show")
 				.WithSortOrder(1)
+				.AddPropertyType()
+				.WithPropertyEditorAlias(Constants.PropertyEditors.Aliases.BlockList)
+				.WithValueStorageType(ValueStorageType.Nvarchar)
+				.WithDataTypeId(12345)
+				.WithAlias("genres")
+				.WithName("Genres")
+				.WithSortOrder(1)
+				.Done()
 				.AddPropertyType()
 				.WithPropertyEditorAlias(Constants.PropertyEditors.Aliases.RichText)
 				.WithValueStorageType(ValueStorageType.Ntext)
 				.WithAlias("showSummary")
 				.WithName("Show Summary")
-				.WithSortOrder(1)
+				.WithSortOrder(2)
 				.WithDataTypeId(Constants.DataTypes.RichtextEditor)
 				.Done()
 				.AddPropertyType()
@@ -103,19 +112,44 @@ namespace TvShowsCatalog.Tests
 				.WithValueStorageType(ValueStorageType.Nvarchar)
 				.WithAlias("showImage")
 				.WithName("Show Image")
-				.WithSortOrder(2)
+				.WithSortOrder(3)
 				.Done()
 				.Build();
 
+			var genreBuilder = new ContentTypeBuilder();
+	        var genreContentType = (ContentType)genreBuilder
+				.WithAlias("genre")
+				.WithName("Genre")
+				.WithIsElement(true)
+				.WithContentVariation(ContentVariation.Culture)
+				.WithId(12345)
+				.AddPropertyType()
+				.WithPropertyEditorAlias(Constants.PropertyEditors.Aliases.TextBox)
+				.WithValueStorageType(ValueStorageType.Nvarchar)
+				.WithAlias("indexNumber")
+				.WithName("Index Number")
+				.WithSortOrder(1)
+				.Done()
+				.AddPropertyType()
+				.WithPropertyEditorAlias(Constants.PropertyEditors.Aliases.TextBox)
+				.WithValueStorageType(ValueStorageType.Nvarchar)
+				.WithVariations(ContentVariation.Culture)
+				.WithAlias("title")
+				.WithName("Title")
+				.WithSortOrder(2)
+				.Done()
+				.Build();
+				
 
-            if (contentType == null)
+
+            if (tvShowContentType == null)
             {
                 Assert.Fail("Content type is null.");
             }
 
             try
             {
-                _contentTypeService.Save(contentType);
+                _contentTypeService.Save(tvShowContentType);
             }
             catch (Exception ex)
             {
@@ -125,7 +159,7 @@ namespace TvShowsCatalog.Tests
             var importedContent = _importContentService.ImportContentAsync(-1);
 
 			int count = _contentService.Count("tVShow");
-			Assert.AreEqual(240, count);
+			Assert.AreEqual(76331, count);
         }
 
 		[Test]

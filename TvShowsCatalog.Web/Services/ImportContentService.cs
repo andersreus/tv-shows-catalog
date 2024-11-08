@@ -2,6 +2,7 @@
 using TvShowsCatalog.Web.Helpers;
 using TvShowsCatalog.Web.Models.ApiModels;
 using Umbraco.Cms.Core.Models;
+using Umbraco.Cms.Core.Models.Blocks;
 using Umbraco.Cms.Core.Scoping;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Extensions;
@@ -37,6 +38,13 @@ namespace TvShowsCatalog.Web.Services
             if (media != null)
             {
                 node.SetValue("showImage", media.GetUdi().ToString());
+            }
+            
+            List<BlockListModel> genreBlocks = new List<BlockListModel>();
+
+            foreach (var block in genreBlocks)
+            {
+                node.SetValue("genres",tvshow.Genres);
             }
 
             // Set template for each node.
