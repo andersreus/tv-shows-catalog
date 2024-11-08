@@ -7,7 +7,8 @@
       {
         "contentElementTypeKey": "db2fae15-ca08-45af-958b-4f6431a833e2"
       }
-    ]
+    ],
+    "useSingleBlockMode": false
   },
   "Udi": "umb://data-type/3f0105805f0445b783e5d2e0e519a7f3",
   "Dependencies": [
