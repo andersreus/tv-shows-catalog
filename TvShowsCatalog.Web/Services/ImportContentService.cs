@@ -70,7 +70,8 @@ namespace TvShowsCatalog.Web.Services
                         {"indexNumber", index.ToString()}
                     }
                 });
-                // brug for loop i stedet for foreach (til index++)
+                // erstat foreach med for loop i stedet for at undgå at "index++"
+                
                 index++;
             }
             
