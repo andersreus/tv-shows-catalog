@@ -1,10 +1,13 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using TvShowsCatalog.Web.Helpers;
 using TvShowsCatalog.Web.Models.ApiModels;
+using TvShowsCatalog.Web.Models.CoreModels;
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Models;
+using Umbraco.Cms.Core.Models.Blocks;
 using Umbraco.Cms.Core.Scoping;
 using Umbraco.Cms.Core.Serialization;
 using Umbraco.Cms.Core.Services;
@@ -43,8 +46,7 @@ namespace TvShowsCatalog.Web.Services
             {
                 tvShowNode.SetValue("showImage", media.GetUdi().ToString());
             }
-
-            // Assign template to each individual node.
+            
             var template = tvShowContentType.AllowedTemplates.FirstOrDefault(t => t.Alias == "show");
             if (template != null)
             {
@@ -57,23 +59,39 @@ namespace TvShowsCatalog.Web.Services
 
             int index = 0;
             IContentType? elementContentType = _contentTypeService.Get("genre");
-            var elementData = new List<BlockListElementData>();
+            var elementData = new List<BlockItemData>();
             foreach (var genre in tvshow.Genres)
             {
-                var contentUdi = Udi.Create(Constants.UdiEntityType.Element, Guid.NewGuid());
-                elementData.Add(new BlockListElementData(elementContentType.Key, contentUdi)
+                elementData.Add(new(new GuidUdi(Constants.UdiEntityType.Element, Guid.NewGuid()), elementContentType.Key, elementContentType.Alias)
                 {
-                    Data = new Dictionary<string, object>
+                    RawPropertyValues = new Dictionary<string, object?>
                     {
-                        { "title", genre},
-                        { "indexNumber", index.ToString() },
+                        {"title", genre},
+                        {"indexNumber", index.ToString()}
                     }
                 });
+                // erstat foreach med for loop i stedet for at undgå at "index++"
+                
                 index++;
             }
             
-            var propertyValue = _serializer.Serialize(elementData);
-            
+            var contentUdi = Udi.Create(Constants.UdiEntityType.Element, Guid.NewGuid());
+            var blockListValue = new BlockListValue
+            {
+                Layout = new Dictionary<string, IEnumerable<IBlockLayoutItem>>
+                {
+                    {
+                        Constants.PropertyEditors.Aliases.BlockList,
+                        new IBlockLayoutItem[]
+                        {
+                            new BlockListLayoutItem { ContentUdi = contentUdi }
+                        }
+                    }
+                },
+                ContentData = elementData
+            };
+
+            var propertyValue = _serializer.Serialize(blockListValue);
             tvShowNode.SetValue("genres", propertyValue);
 
             _contentService.Save(tvShowNode);
@@ -137,24 +155,6 @@ namespace TvShowsCatalog.Web.Services
                 ShouldRunImport = !isThereContent,
                 AllTvShowsContentNodeId = allTvShowsContentNodeId
             };
-        }
-        
-        private class BlockListElementData
-        {
-            public BlockListElementData(Guid contentTypeKey, Udi udi)
-            {
-                ContentTypeKey = contentTypeKey;
-                Udi = udi;
-            }
-
-            [JsonPropertyName("contentTypeKey")]
-            public Guid ContentTypeKey { get; }
-
-            [JsonPropertyName("udi")]
-            public Udi Udi { get; }
-
-            [JsonExtensionData]
-            public Dictionary<string, object>? Data { get; set;}
         }
     }
 }
