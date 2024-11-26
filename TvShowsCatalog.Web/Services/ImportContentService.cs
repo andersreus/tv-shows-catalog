@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Globalization;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
@@ -24,8 +25,9 @@ namespace TvShowsCatalog.Web.Services
         private readonly IContentTypeService _contentTypeService;
         private readonly ILogger<ImportContentService> _logger;
         private readonly IJsonSerializer _serializer;
+        private readonly ILocalizedTextService _localizedTextService;
 
-        public ImportContentService(IContentService contentService, ITvMazeService tVMazeService, IImportMediaService importMediaService, ICoreScopeProvider coreScopeProvider, IContentTypeService contentTypeService, ILogger<ImportContentService> logger, IJsonSerializer serializer)
+        public ImportContentService(IContentService contentService, ITvMazeService tVMazeService, IImportMediaService importMediaService, ICoreScopeProvider coreScopeProvider, IContentTypeService contentTypeService, ILogger<ImportContentService> logger, IJsonSerializer serializer, ILocalizedTextService localizedTextService)
         {
             _contentService = contentService;
             _tvMazeService = tVMazeService;
@@ -34,6 +36,7 @@ namespace TvShowsCatalog.Web.Services
             _contentTypeService = contentTypeService;
             _logger = logger;
             _serializer = serializer;
+            _localizedTextService = localizedTextService;
         }
 
         // TODO: CreateOrUpdateContent?
@@ -42,68 +45,76 @@ namespace TvShowsCatalog.Web.Services
 			var tvShowNode = _contentService.Create(tvshow.Name, allTvShowsContentNodeId, "tVShow");
 			tvShowNode.SetValue("showSummary", tvshow.Summary ?? "No summary for this TV show");
 
-            if (media != null)
+            if (media == null)
             {
-                tvShowNode.SetValue("showImage", media.GetUdi().ToString());
+                _logger.LogWarning($"Could not find a image for this TV show: {tvshow.Name}");
             }
+            tvShowNode.SetValue("showImage", media.GetUdi().ToString());
             
-<<<<<<< HEAD
-            List<BlockListModel> genreBlocks = new List<BlockListModel>();
-
-            foreach (var block in genreBlocks)
-            {
-                node.SetValue("genres",tvshow.Genres);
-            }
-
-            // Assign template to each individual node.
-=======
->>>>>>> 8da1b1072bff6de12aa6e16615be029da580533b
-            var template = tvShowContentType.AllowedTemplates.FirstOrDefault(t => t.Alias == "show");
-            if (template != null)
-            {
-                tvShowNode.TemplateId = template.Id;
-            }
-            else
-            {
-                _logger.LogWarning($"Could not find show template for this TV show, {tvshow.Name}");
-            }
-
-            int index = 0;
+            // var template = tvShowContentType.AllowedTemplates.FirstOrDefault(t => t.Alias == "show");
+            // if (template != null)
+            // {
+            //     tvShowNode.TemplateId = template.Id;
+            // }
+            // else
+            // {
+            //     _logger.LogWarning($"Could not find show template for this TV show, {tvshow.Name}");
+            // }
+            
+            // Get the genre element type
             IContentType? elementContentType = _contentTypeService.Get("genre");
-            var elementData = new List<BlockItemData>();
-            foreach (var genre in tvshow.Genres)
-            {
-                elementData.Add(new(new GuidUdi(Constants.UdiEntityType.Element, Guid.NewGuid()), elementContentType.Key, elementContentType.Alias)
-                {
-                    RawPropertyValues = new Dictionary<string, object?>
-                    {
-                        {"title", genre},
-                        {"indexNumber", index.ToString()}
-                    }
-                });
-                // erstat foreach med for loop i stedet for at undgå at "index++"
-                
-                index++;
-            }
-            
-            var contentUdi = Udi.Create(Constants.UdiEntityType.Element, Guid.NewGuid());
-            var blockListValue = new BlockListValue
-            {
-                Layout = new Dictionary<string, IEnumerable<IBlockLayoutItem>>
-                {
-                    {
-                        Constants.PropertyEditors.Aliases.BlockList,
-                        new IBlockLayoutItem[]
-                        {
-                            new BlockListLayoutItem { ContentUdi = contentUdi }
-                        }
-                    }
-                },
-                ContentData = elementData
-            };
 
-            var propertyValue = _serializer.Serialize(blockListValue);
-            tvShowNode.SetValue("genres", propertyValue);
+            foreach (var culture in cultures)
+            {
+                var elementData = new List<BlockItemData>();
+
+                for (int index = 0; index < tvshow.Genres.Count(); index++)
+                {
+                    var genre = tvshow.Genres[index];
+                    
+                    // Localize needs a CultureInfo object and not just the culture string.
+                    CultureInfo cultureInfo = new CultureInfo(culture);
+                    
+                    // Fejler her
+                    var localizedGenreTitle = _localizedTextService.Localize("genres", genre, cultureInfo);
+                    //var localizedGenreTitle = _localizedTextService.Localize("actions", genre, cultureInfo, null);
+
+                    if (string.IsNullOrWhiteSpace(localizedGenreTitle))
+                    {
+                        localizedGenreTitle = genre;
+                    }
+                    elementData.Add(new(new GuidUdi(Constants.UdiEntityType.Element, Guid.NewGuid()), elementContentType.Key, elementContentType.Alias)
+                    {
+                        // Set property values for the BlockItemData
+                        // I assume Dictionary is used because the object can contain different datatypes for each property (string, int, bool etc)
+                        RawPropertyValues = new Dictionary<string, object?>
+                        {
+                            {"title", localizedGenreTitle},
+                            {"indexNumber", index.ToString()}
+                        }
+                    });
+                }
+            
+                var contentUdi = Udi.Create(Constants.UdiEntityType.Element, Guid.NewGuid());
+                var blockListValue = new BlockListValue
+                {
+                    Layout = new Dictionary<string, IEnumerable<IBlockLayoutItem>>
+                    {
+                        {
+                            Constants.PropertyEditors.Aliases.BlockList,
+                            new IBlockLayoutItem[]
+                            {
+                                new BlockListLayoutItem { ContentUdi = contentUdi }
+                            }
+                        }
+                    },
+                    ContentData = elementData
+                };
+
+                // Serialize the blocklist property (data and layout) to json
+                var propertyValue = _serializer.Serialize(blockListValue);
+                tvShowNode.SetValue("genres", propertyValue);
+            }
 
             _contentService.Save(tvShowNode);
 			_contentService.Publish(tvShowNode, cultures);
@@ -112,7 +123,7 @@ namespace TvShowsCatalog.Web.Services
 		public async Task<IEnumerable<TvMazeModel>> ImportContentAsync(int allTvShowsContentNodeId, int importAmount)
         {
             var allTvShows = await _tvMazeService.GetAllAsync();
-            var cultures = Array.Empty<string>();
+            var cultures = new[] { "en-US", "da-DK" };
             var tvShowContentType = _contentTypeService.Get("tvShow");
 
             // Break down alltvshows into manageable batches
