@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using Twilio.Rest.Verify.V2.Service;
 using Umbraco.Cms.Core.Cache;
