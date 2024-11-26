@@ -21,7 +21,6 @@ namespace TvShowsCatalog.Web.UI.Twilio
         IHttpContextAccessor _httpContextAccessor;
 
         private readonly string? _serviceSid;
-        
         private readonly ILogger<AuthenticationSurfaceController> _logger;
         private readonly IHttpClientFactory _factory;
 
@@ -45,7 +44,7 @@ namespace TvShowsCatalog.Web.UI.Twilio
             _memberManager = memberManager;
             _memberSignInManager = memberSignInManager;
             _httpContextAccessor = httpContextAccessor;
-            _serviceSid = configuration["ServiceSid"];
+            _serviceSid = configuration["SmsDataService:Twilio:ServiceSid"];
             _logger = logger;
             _factory = factory;
         }
