@@ -7,10 +7,10 @@ using Umbraco.Cms.Infrastructure.Services;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-if (builder.Environment.IsDevelopment())
-{
-    builder.Configuration.AddUserSecrets<Program>();
-}
+// if (builder.Environment.IsDevelopment())
+// {
+//     builder.Configuration.AddUserSecrets<Program>();
+// }
 
 builder.CreateUmbracoBuilder()
     .AddBackOffice()
@@ -27,16 +27,16 @@ WebApplication app = builder.Build();
 
 await app.BootUmbracoAsync();
 
-var config = new ConfigurationBuilder()
-    .AddUserSecrets<Program>()
-    .Build();
-
-var configPath = "SmsDataService:Twilio:";
-
-var accountSid = config[$"{configPath}AccountSid"];
-var authToken = config[$"{configPath}AuthToken"];
-
-TwilioClient.Init(accountSid, authToken);
+// var config = new ConfigurationBuilder()
+//     .AddUserSecrets<Program>()
+//     .Build();
+//
+// var configPath = "SmsDataService:Twilio:";
+//
+// var accountSid = config[$"{configPath}AccountSid"];
+// var authToken = config[$"{configPath}AuthToken"];
+//
+// TwilioClient.Init(accountSid, authToken);
 
 app.UseHttpsRedirection();
 

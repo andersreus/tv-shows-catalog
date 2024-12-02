@@ -33,13 +33,14 @@ namespace TvShowsCatalog.Tests
 		//private IDataTypeService _dataTypeService;
 		//private IShortStringHelper _shortStringHelper;
 		private ITemplateService _templateService;
+		private ILanguageService _languageService;
 		
 		private IConfigurationEditorJsonSerializer ConfigurationEditorJsonSerializer => GetRequiredService<IConfigurationEditorJsonSerializer>();
 		private IDataTypeService DataTypeService => GetRequiredService<IDataTypeService>();
 		protected PropertyEditorCollection PropertyEditorCollection => GetRequiredService<PropertyEditorCollection>();
 
 		[SetUp]
-		public void Setup()
+		public new void Setup()
 		{
 			_mediaService = GetRequiredService<IMediaService>();
 			_tvMazeService = GetRequiredService<ITvMazeService>();
@@ -50,6 +51,7 @@ namespace TvShowsCatalog.Tests
 			//_dataTypeService = GetRequiredService<IDataTypeService>();
 			//_shortStringHelper = GetRequiredService<IShortStringHelper>();
 			_templateService = GetRequiredService<ITemplateService>();
+			_languageService = GetRequiredService<ILanguageService>();
 		}
 
 		protected override void CustomTestSetup(IUmbracoBuilder builder)
@@ -117,45 +119,52 @@ namespace TvShowsCatalog.Tests
 	        _contentTypeService.Save(genreElementType);
 	        var nestedBlockListDataType = await CreateBlockListDataType(genreElementType);
 	        
-            var tvShowContentType = new ContentTypeBuilder()
-				.WithAlias("tVShow")
-				.WithName("TV Show")
-				.AddPropertyType()
-				.WithAlias("genres")
-				.WithName("Genres")
-				.WithDataTypeId(nestedBlockListDataType.Id)
-				.WithPropertyEditorAlias(Constants.PropertyEditors.Aliases.BlockList)
-				.WithValueStorageType(ValueStorageType.Ntext)
-				.Done()
-				.AddPropertyType()
-				.WithAlias("showSummary")
-				.WithName("Show Summary")
-				.WithDataTypeId(Constants.DataTypes.RichtextEditor)
-				.WithPropertyEditorAlias(Constants.PropertyEditors.Aliases.RichText)
-				.WithValueStorageType(ValueStorageType.Ntext)
-				.Done()
-				.AddPropertyType()
-				.WithAlias("showImage")
-				.WithName("Show Image")
-				// .WithDataTypeId(Constants.DataTypes.)
-				.WithPropertyEditorAlias(Constants.PropertyEditors.Aliases.MediaPicker3)
-				.WithValueStorageType(ValueStorageType.Nvarchar)
-				.Done()
-				.Build();
-			_contentTypeService.Save(tvShowContentType);
+	        var tvShowContentType = new ContentTypeBuilder()
+		        .WithAlias("tVShow")
+		        .WithName("TV Show")
+		        .AddPropertyType()
+		        .WithAlias("genres")
+		        .WithName("Genres")
+		        .WithDataTypeId(nestedBlockListDataType.Id)
+		        .WithPropertyEditorAlias(Constants.PropertyEditors.Aliases.BlockList)
+		        .WithValueStorageType(ValueStorageType.Ntext)
+		        .Done()
+		        .AddPropertyType()
+		        .WithAlias("showSummary")
+		        .WithName("Show Summary")
+		        .WithDataTypeId(Constants.DataTypes.RichtextEditor)
+		        .WithPropertyEditorAlias(Constants.PropertyEditors.Aliases.RichText)
+		        .WithValueStorageType(ValueStorageType.Ntext)
+		        .Done()
+		        .AddPropertyType()
+		        .WithAlias("showImage")
+		        .WithName("Show Image")
+		        // .WithDataTypeId(Constants.DataTypes.)
+		        .WithPropertyEditorAlias(Constants.PropertyEditors.Aliases.MediaPicker3)
+		        .WithValueStorageType(ValueStorageType.Nvarchar)
+		        .Done()
+		        .Build();
+	        _contentTypeService.Save(tvShowContentType);
 
-			var parentId = -1;
-			var importAmount = 1000;
-            var importedContent = await _importContentService.ImportContentAsync(parentId, importAmount);
+	        var parentId = -1;
+	        var importAmount = 1000;
+	        var importedContent = await _importContentService.ImportContentAsync(parentId, importAmount);
 
-			int count = _contentService.Count("tVShow");
+	        int count = _contentService.Count("tVShow");
 			
-			Assert.AreEqual(importAmount, count);
+	        Assert.AreEqual(importAmount, count);
         }
 
 		[Test]
 		public async Task Create_All_TvShows_As_Content_In_Backoffice_With_Variants()
-        {
+		{
+			//var defaultLang = _languageService.GetAllAsync();
+			
+			var language = new LanguageBuilder()
+				.WithCultureInfo("da-DK")
+				.Build();
+			await _languageService.CreateAsync(language, Constants.Security.SuperUserKey);
+			
 	        var genreElementType = new ContentTypeBuilder()
 		        .WithAlias("genre")
 		        .WithName("Genre")
@@ -214,7 +223,7 @@ namespace TvShowsCatalog.Tests
 
 			var parentId = -1;
 			var importAmount = 1000;
-            var importedContent = _importContentService.ImportContentAsync(parentId, importAmount);
+            var importedContent = await _importContentService.ImportContentAsync(parentId, importAmount);
 
 			int count = _contentService.Count("tVShow");
 			Assert.AreEqual(importAmount, count);
