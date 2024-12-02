@@ -25,9 +25,9 @@ namespace TvShowsCatalog.Web.Services
         private readonly IContentTypeService _contentTypeService;
         private readonly ILogger<ImportContentService> _logger;
         private readonly IJsonSerializer _serializer;
-        private readonly ILocalizedTextService _localizedTextService;
+        private readonly ITranslationService _translationService;
 
-        public ImportContentService(IContentService contentService, ITvMazeService tVMazeService, IImportMediaService importMediaService, ICoreScopeProvider coreScopeProvider, IContentTypeService contentTypeService, ILogger<ImportContentService> logger, IJsonSerializer serializer, ILocalizedTextService localizedTextService)
+        public ImportContentService(IContentService contentService, ITvMazeService tVMazeService, IImportMediaService importMediaService, ICoreScopeProvider coreScopeProvider, IContentTypeService contentTypeService, ILogger<ImportContentService> logger, IJsonSerializer serializer, ITranslationService translationService)
         {
             _contentService = contentService;
             _tvMazeService = tVMazeService;
@@ -36,7 +36,7 @@ namespace TvShowsCatalog.Web.Services
             _contentTypeService = contentTypeService;
             _logger = logger;
             _serializer = serializer;
-            _localizedTextService = localizedTextService;
+            _translationService = translationService;
         }
 
         // TODO: CreateOrUpdateContent?
@@ -67,35 +67,26 @@ namespace TvShowsCatalog.Web.Services
             foreach (var culture in cultures)
             {
                 var elementData = new List<BlockItemData>();
+                var isDefaultCulture = string.Equals(culture, "en-US", StringComparison.OrdinalIgnoreCase);
 
                 for (int index = 0; index < tvshow.Genres.Count(); index++)
                 {
                     var genre = tvshow.Genres[index];
                     
-                    // Localize needs a CultureInfo object and not just the culture string.
-                    CultureInfo cultureInfo = new CultureInfo(culture);
-                    
-                    // Fejler her
-                    var localizedGenreTitle = _localizedTextService.Localize("genres", genre, cultureInfo);
-                    //var localizedGenreTitle = _localizedTextService.Localize("actions", genre, cultureInfo, null);
+                    var variantGenreTitle = isDefaultCulture ? genre : _translationService.GetTranslation(culture,genre);
 
-                    if (string.IsNullOrWhiteSpace(localizedGenreTitle))
-                    {
-                        localizedGenreTitle = genre;
-                    }
                     elementData.Add(new(new GuidUdi(Constants.UdiEntityType.Element, Guid.NewGuid()), elementContentType.Key, elementContentType.Alias)
                     {
                         // Set property values for the BlockItemData
                         // I assume Dictionary is used because the object can contain different datatypes for each property (string, int, bool etc)
                         RawPropertyValues = new Dictionary<string, object?>
                         {
-                            {"title", localizedGenreTitle},
+                            {"title", variantGenreTitle},
                             {"indexNumber", index.ToString()}
                         }
                     });
                 }
-            
-                var contentUdi = Udi.Create(Constants.UdiEntityType.Element, Guid.NewGuid());
+
                 var blockListValue = new BlockListValue
                 {
                     Layout = new Dictionary<string, IEnumerable<IBlockLayoutItem>>
@@ -104,7 +95,7 @@ namespace TvShowsCatalog.Web.Services
                             Constants.PropertyEditors.Aliases.BlockList,
                             new IBlockLayoutItem[]
                             {
-                                new BlockListLayoutItem { ContentUdi = contentUdi }
+                                new BlockListLayoutItem { ContentUdi = Udi.Create(Constants.UdiEntityType.Element, Guid.NewGuid()) }
                             }
                         }
                     },
@@ -113,8 +104,11 @@ namespace TvShowsCatalog.Web.Services
 
                 // Serialize the blocklist property (data and layout) to json
                 var propertyValue = _serializer.Serialize(blockListValue);
-                tvShowNode.SetValue("genres", propertyValue);
+                tvShowNode.SetValue("genres", propertyValue, culture);
             }
+            
+            tvShowNode.SetCultureName(tvshow.Name,"en-US");
+            tvShowNode.SetCultureName(tvshow.Name,"da-DK");
 
             _contentService.Save(tvShowNode);
 			_contentService.Publish(tvShowNode, cultures);
