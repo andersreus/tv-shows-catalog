@@ -1,20 +1,12 @@
-using System.Diagnostics;
-using System.Reflection.Metadata;
-using AutoFixture;
 using Microsoft.Extensions.DependencyInjection;
-using NPoco;
 using TvShowsCatalog.Web.Services;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Services;
-using Umbraco.Cms.Core.Strings;
 using Umbraco.Cms.Tests.Common.Builders;
 using Umbraco.Cms.Tests.Common.Builders.Extensions;
 using Umbraco.Cms.Tests.Common.Testing;
 using Umbraco.Cms.Tests.Integration.Testing;
 using Umbraco.Cms.Core;
-using Bogus.DataSets;
-using Lucene.Net.Search;
-using Microsoft.Extensions.Logging;
 using Umbraco.Cms.Core.PropertyEditors;
 using Umbraco.Cms.Core.Serialization;
 
@@ -34,6 +26,7 @@ namespace TvShowsCatalog.Tests
 		//private IShortStringHelper _shortStringHelper;
 		private ITemplateService _templateService;
 		private ILanguageService _languageService;
+		private ITranslationService _translationService;
 		
 		private IConfigurationEditorJsonSerializer ConfigurationEditorJsonSerializer => GetRequiredService<IConfigurationEditorJsonSerializer>();
 		private IDataTypeService DataTypeService => GetRequiredService<IDataTypeService>();
@@ -52,6 +45,7 @@ namespace TvShowsCatalog.Tests
 			//_shortStringHelper = GetRequiredService<IShortStringHelper>();
 			_templateService = GetRequiredService<ITemplateService>();
 			_languageService = GetRequiredService<ILanguageService>();
+			_translationService = GetRequiredService<ITranslationService>();
 		}
 
 		protected override void CustomTestSetup(IUmbracoBuilder builder)
@@ -59,6 +53,7 @@ namespace TvShowsCatalog.Tests
 			builder.Services.AddTransient<ITvMazeService, TvMazeService>();
 			builder.Services.AddTransient<IImportMediaService, ImportMediaService>();
 			builder.Services.AddTransient<IImportContentService, ImportContentService>();
+			builder.Services.AddTransient<ITranslationService, TranslationService>();
 		}
 
 		[Test]

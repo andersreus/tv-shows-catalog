@@ -39,6 +39,22 @@ public class TranslationService : ITranslationService
     
     public string GetTranslation(string culture, string alias)
     {
-        throw new NotImplementedException();
+        if (string.IsNullOrWhiteSpace(culture))
+        {
+            throw new ArgumentNullException(nameof(culture));
+        }
+        
+        if (string.IsNullOrWhiteSpace(alias))
+        {
+            throw new ArgumentNullException(nameof(alias));
+        }
+
+        if (culture == "da-DK")
+        {
+            // Check if dictionary contains the alias, if it does, return the translation, else return the original alias as fallback = en-us
+            return genreTranslations.TryGetValue(alias, out var translation) ? translation : alias;
+        }
+        
+        return alias;
     }
 }
