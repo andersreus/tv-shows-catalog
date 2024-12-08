@@ -61,56 +61,68 @@ namespace TvShowsCatalog.Web.Services
             //     _logger.LogWarning($"Could not find show template for this TV show, {tvshow.Name}");
             // }
             
-            // Get the genre element type
+            // Get the genre content/element type for the genre blocks
             IContentType? elementContentType = _contentTypeService.Get("genre");
-
+            
+            // Layout and ContentData was not correctly linked, was using two sets of UDI's.
+            
+            // Iterate over each culture for making block variations.
             foreach (var culture in cultures)
             {
+                // Create lists to represent the elementdata (contentData) and the layout items
                 var elementData = new List<BlockItemData>();
+                var layoutItems = new List<IBlockLayoutItem>();
+                
+                // Check if culture is default = en-US
                 var isDefaultCulture = string.Equals(culture, "en-US", StringComparison.OrdinalIgnoreCase);
-
+                
+                // Loop through each genre attached to the tvshow
                 for (int index = 0; index < tvshow.Genres.Count(); index++)
                 {
+                    // Save current index in local variable
                     var genre = tvshow.Genres[index];
-                    
+                    // If default culture, keep it as it is. If not, call translationservice to get the translated version (da-DK)
                     var variantGenreTitle = isDefaultCulture ? genre : _translationService.GetTranslation(culture,genre);
-
-                    elementData.Add(new(new GuidUdi(Constants.UdiEntityType.Element, Guid.NewGuid()), elementContentType.Key, elementContentType.Alias)
+                    // Create a unique identifier for the current block
+                    var contentUdi = new GuidUdi(Constants.UdiEntityType.Element, Guid.NewGuid());
+                    // Define and set properties for current block
+                    elementData.Add(new(contentUdi, elementContentType.Key, elementContentType.Alias)
                     {
-                        // Set property values for the BlockItemData
-                        // I assume Dictionary is used because the object can contain different datatypes for each property (string, int, bool etc)
                         RawPropertyValues = new Dictionary<string, object?>
                         {
                             {"title", variantGenreTitle},
                             {"indexNumber", index.ToString()}
                         }
                     });
+                    // Create the link between the block and the layout. The layout represents the visual arrangement of the blocks (check json).
+                    layoutItems.Add(new BlockListLayoutItem
+                    {
+                        // Same UDI as for the content of the block
+                        ContentUdi = contentUdi
+                    });
                 }
-
+                // Create the blocklist value object
                 var blockListValue = new BlockListValue
                 {
+                    // Assign the layout with reference to each blocks UDI
                     Layout = new Dictionary<string, IEnumerable<IBlockLayoutItem>>
                     {
-                        {
-                            Constants.PropertyEditors.Aliases.BlockList,
-                            new IBlockLayoutItem[]
-                            {
-                                new BlockListLayoutItem { ContentUdi = Udi.Create(Constants.UdiEntityType.Element, Guid.NewGuid()) }
-                            }
-                        }
+                        {Constants.PropertyEditors.Aliases.BlockList, layoutItems}
                     },
+                    // Set the content data
                     ContentData = elementData
                 };
-
-                // Serialize the blocklist property (data and layout) to json
+                // Serialize the blocklist value object into json format
                 var propertyValue = _serializer.Serialize(blockListValue);
+                // assign the blocklist to my tvshow
                 tvShowNode.SetValue("genres", propertyValue, culture);
             }
-            
+            // Names of each variant needs to be set. Just give it the default tvshow name for both variants.
             tvShowNode.SetCultureName(tvshow.Name,"en-US");
             tvShowNode.SetCultureName(tvshow.Name,"da-DK");
 
             _contentService.Save(tvShowNode);
+            // Publish with all cultures
 			_contentService.Publish(tvShowNode, cultures);
 		}
 
