@@ -36,7 +36,7 @@ namespace TvShowsCatalog.Web.UI
                 {
                     _logger.LogInformation("Running tvshow import for parent node with id {RootId}", importDecision.AllTvShowsContentNodeId);
 
-                    var importedItems = await _importContentService.ImportContentAsync(importDecision.AllTvShowsContentNodeId,1000);
+                    var importedItems = await _importContentService.ImportContentAsync(importDecision.AllTvShowsContentNodeId,77400);
 
                     _logger.LogInformation("Imported {Count} tvshows at {Time}", importedItems.Count(), DateTime.UtcNow);
                 }

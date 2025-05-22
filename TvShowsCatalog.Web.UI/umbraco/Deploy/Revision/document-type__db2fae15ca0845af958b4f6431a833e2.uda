@@ -3,13 +3,14 @@
   "Alias": "genre",
   "AllowedTemplates": [],
   "HistoryCleanup": {},
-  "Icon": "icon-plugin",
+  "Icon": "icon-sience",
   "Thumbnail": "folder.png",
   "Permissions": {
     "AllowVaryingByCulture": true,
     "IsElementType": true,
     "AllowedChildContentTypes": []
   },
+  "Parent": "umb://document-type-container/f309ecaa607847d9b9028df49732fbc5",
   "CompositionContentTypes": [],
   "PropertyGroups": [
     {
@@ -41,8 +42,12 @@
     {
       "Udi": "umb://data-type/0cc0eba1996042c9bf9b60e150b429ae",
       "Ordering": true
+    },
+    {
+      "Udi": "umb://document-type-container/f309ecaa607847d9b9028df49732fbc5",
+      "Ordering": true
     }
   ],
   "__type": "Umbraco.Deploy.Infrastructure,Umbraco.Deploy.Infrastructure.Artifacts.ContentType.DocumentTypeArtifact",
-  "__version": "14.1.4"
+  "__version": "14.2.1"
 }
