@@ -27,18 +27,20 @@ WebApplication app = builder.Build();
 
 await app.BootUmbracoAsync();
 
-// var config = new ConfigurationBuilder()
-//     .AddUserSecrets<Program>()
-//     .Build();
-//
-// var configPath = "SmsDataService:Twilio:";
-//
-// var accountSid = config[$"{configPath}AccountSid"];
-// var authToken = config[$"{configPath}AuthToken"];
-//
-// TwilioClient.Init(accountSid, authToken);
+var config = new ConfigurationBuilder()
+    .AddUserSecrets<Program>()
+    .Build();
+
+var configPath = "SmsDataService:Twilio:";
+
+var accountSid = config[$"{configPath}AccountSid"];
+var authToken = config[$"{configPath}AuthToken"];
+
+TwilioClient.Init(accountSid, authToken);
 
 app.UseHttpsRedirection();
+
+//app.UseDeveloperExceptionPage();
 
 app.UseUmbraco()
     .WithMiddleware(u =>
