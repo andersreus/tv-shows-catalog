@@ -9,9 +9,9 @@ namespace TvShowsCatalog.Web.UI
     {
         private readonly IImportContentService _importContentService;
         private readonly ILogger<ContentImportFromMaze> _logger;
-        public TimeSpan Period { get => TimeSpan.FromHours(1); }
-
-        // Run initial import 30 seconds after application start. After that, one hour between.
+        // Run initial import 30 seconds after application startup. After that, once pr day.
+        public TimeSpan Period { get => TimeSpan.FromDays(1); }
+        
         TimeSpan Delay = TimeSpan.FromSeconds(30);
 
         public event EventHandler PeriodChanged { add { } remove { } }
@@ -35,8 +35,9 @@ namespace TvShowsCatalog.Web.UI
                 if (importDecision.ShouldRunImport)
                 {
                     _logger.LogInformation("Running tvshow import for parent node with id {RootId}", importDecision.AllTvShowsContentNodeId);
-
-                    var importedItems = await _importContentService.ImportContentAsync(importDecision.AllTvShowsContentNodeId,77400);
+                    
+                    // Current amount is 85135 (2 june 2025)
+                    var importedItems = await _importContentService.ImportContentAsync(importDecision.AllTvShowsContentNodeId,500);
 
                     _logger.LogInformation("Imported {Count} tvshows at {Time}", importedItems.Count(), DateTime.UtcNow);
                 }
