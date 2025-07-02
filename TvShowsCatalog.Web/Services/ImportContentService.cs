@@ -26,8 +26,25 @@ namespace TvShowsCatalog.Web.Services
         private readonly ILogger<ImportContentService> _logger;
         private readonly IJsonSerializer _serializer;
         private readonly ITranslationService _translationService;
+        private readonly IContentEditingService _contentEditingService;
+        private readonly IContentPublishingService _contentPublishingService;
+        private const string TvShowContentTypeAlias = "tVShow";
+        private const string TvShowsContentTypeAlias = "tvShows";
+        private const string GenreContentTypeAlias = "genre";
+        private const string TvShowSummaryPropertyAlias = "showSummary";
+        private const string TvShowImagePropertyAlias = "showImage";
 
-        public ImportContentService(IContentService contentService, ITvMazeService tVMazeService, IImportMediaService importMediaService, ICoreScopeProvider coreScopeProvider, IContentTypeService contentTypeService, ILogger<ImportContentService> logger, IJsonSerializer serializer, ITranslationService translationService)
+        public ImportContentService(
+            IContentService contentService, 
+            ITvMazeService tVMazeService, 
+            IImportMediaService importMediaService, 
+            ICoreScopeProvider coreScopeProvider, 
+            IContentTypeService contentTypeService, 
+            ILogger<ImportContentService> logger, 
+            IJsonSerializer serializer, 
+            ITranslationService translationService,
+            IContentEditingService contentEditingService,
+            IContentPublishingService contentPublishingService)
         {
             _contentService = contentService;
             _tvMazeService = tVMazeService;
@@ -37,55 +54,35 @@ namespace TvShowsCatalog.Web.Services
             _logger = logger;
             _serializer = serializer;
             _translationService = translationService;
+            _contentEditingService = contentEditingService;
+            _contentPublishingService = contentPublishingService;
         }
-
-        // TODO: CreateOrUpdateContent?
-        public void CreateContent(TvMazeModel tvshow, IMedia media, int allTvShowsContentNodeId, string[] cultures, IContentType tvShowContentType)
+        
+        public async Task CreateContent(TvMazeModel tvshow, IMedia media, int allTvShowsContentNodeId, string[] cultures, IContentType tvShowContentType)
 		{
-			var tvShowNode = _contentService.Create(tvshow.Name, allTvShowsContentNodeId, "tVShow");
-			tvShowNode.SetValue("showSummary", tvshow.Summary ?? "No summary for this TV show");
+			var tvShowNode = _contentService.Create(tvshow.Name, allTvShowsContentNodeId, TvShowContentTypeAlias);
+			tvShowNode.SetValue(TvShowSummaryPropertyAlias, tvshow.Summary ?? "No summary for this TV show");
 
-            if (media == null)
+            if (media is null)
             {
                 _logger.LogWarning($"Could not find a image for this TV show: {tvshow.Name}");
+                tvShowNode.SetValue(TvShowImagePropertyAlias, null);
             }
-            tvShowNode.SetValue("showImage", media.GetUdi().ToString());
+            tvShowNode.SetValue(TvShowImagePropertyAlias, media.GetUdi().ToString());
             
-            // var template = tvShowContentType.AllowedTemplates.FirstOrDefault(t => t.Alias == "show");
-            // if (template != null)
-            // {
-            //     tvShowNode.TemplateId = template.Id;
-            // }
-            // else
-            // {
-            //     _logger.LogWarning($"Could not find show template for this TV show, {tvshow.Name}");
-            // }
-            
-            // Get the genre content/element type for the genre blocks
-            IContentType? elementContentType = _contentTypeService.Get("genre");
-            
-            // Layout and ContentData was not correctly linked, was using two sets of UDI's.
-            
-            // Iterate over each culture for making block variations.
+            IContentType? elementContentType = _contentTypeService.Get(GenreContentTypeAlias);
+
             foreach (var culture in cultures)
             {
-                // Create lists to represent the elementdata (contentData) and the layout items
                 var elementData = new List<BlockItemData>();
                 var layoutItems = new List<IBlockLayoutItem>();
-                
-                // Check if culture is default = en-US
                 var isDefaultCulture = string.Equals(culture, "en-US", StringComparison.OrdinalIgnoreCase);
                 
-                // Loop through each genre attached to the tvshow
                 for (int index = 0; index < tvshow.Genres.Count(); index++)
                 {
-                    // Save current index in local variable
                     var genre = tvshow.Genres[index];
-                    // If default culture, keep it as it is. If not, call translationservice to get the translated version (da-DK)
                     var variantGenreTitle = isDefaultCulture ? genre : _translationService.GetTranslation(culture,genre);
-                    // Create a unique identifier for the current block
                     var contentUdi = new GuidUdi(Constants.UdiEntityType.Element, Guid.NewGuid());
-                    // Define and set properties for current block
                     elementData.Add(new(contentUdi, elementContentType.Key, elementContentType.Alias)
                     {
                         RawPropertyValues = new Dictionary<string, object?>
@@ -94,80 +91,75 @@ namespace TvShowsCatalog.Web.Services
                             {"indexNumber", index.ToString()}
                         }
                     });
-                    // Create the link between the block and the layout. The layout represents the visual arrangement of the blocks (check json).
+                    
                     layoutItems.Add(new BlockListLayoutItem
                     {
-                        // Same UDI as for the content of the block
                         ContentUdi = contentUdi
                     });
                 }
-                // Create the blocklist value object
+
                 var blockListValue = new BlockListValue
                 {
-                    // Assign the layout with reference to each blocks UDI
                     Layout = new Dictionary<string, IEnumerable<IBlockLayoutItem>>
                     {
                         {Constants.PropertyEditors.Aliases.BlockList, layoutItems}
                     },
-                    // Set the content data
                     ContentData = elementData
                 };
-                // Serialize the blocklist value object into json format
                 var propertyValue = _serializer.Serialize(blockListValue);
-                // assign the blocklist to my tvshow
                 tvShowNode.SetValue("genres", propertyValue, culture);
             }
-            // Names of each variant needs to be set. Just give it the default tvshow name for both variants.
-            tvShowNode.SetCultureName(tvshow.Name,"en-US");
-            tvShowNode.SetCultureName(tvshow.Name,"da-DK");
 
+            foreach (var culture in cultures)
+            {
+                tvShowNode.SetCultureName(tvshow.Name,culture);
+            }
+            
+            // Use IContentEditingService to save the content
+            // Use IContentPublishingService to publish the content
             _contentService.Save(tvShowNode);
-            // Publish with all cultures
 			_contentService.Publish(tvShowNode, cultures);
 		}
 
-		public async Task<IEnumerable<TvMazeModel>> ImportContentAsync(int allTvShowsContentNodeId, int importAmount)
+        public async Task ImportContentAsync(int parentKey)
         {
-            var allTvShows = await _tvMazeService.GetAllAsync();
-            var cultures = new[] { "en-US", "da-DK" };
-            var tvShowContentType = _contentTypeService.Get("tvShow");
-
-            // Break down alltvshows into manageable batches
             const int batchSize = 500;
-            // Tracks current batch
-            var currentIndex = 0;
+            var cultures = new[] { "en-US", "da-DK" };
+            var tvShowContentType = _contentTypeService.Get(TvShowContentTypeAlias);
 
-            while (currentIndex < importAmount)
+            await foreach (var page in _tvMazeService.GetPageAsync())
             {
-                // Bypass currentIndex and return the next batchsize to the list "batch"
-                var batch = allTvShows.Skip(currentIndex).Take(batchSize).ToList();
-                using (ICoreScope scope = _coreScopeProvider.CreateCoreScope(autoComplete: true)) // new scope/transaction pr batch
+                foreach (var batch in page.Chunk(batchSize))
                 {
-                    foreach (var show in batch)
+                    using (ICoreScope scope = _coreScopeProvider.CreateCoreScope(autoComplete: true))
                     {
-                        try
+                        foreach (var show in batch)
                         {
                             var media = await _importMediaService.ImportMediaAsync(show);
-                            CreateContent(show, media, allTvShowsContentNodeId, cultures, tvShowContentType);
+                            CreateContent(show, media, parentKey, cultures, tvShowContentType);
+                            // Run in debug mode, check if any exceptions are thrown and then add them in the catch block
+                            /*try
+                             {
+                                 var media = await _importMediaService.ImportMediaAsync(show);
+                                 CreateContent(show, media, parentKey, cultures, tvShowContentType);
+                             }
+                             catch ()
+                             {
+                                 _logger.LogError();
+                             }*/
                         }
-                        catch (Exception ex)
-                        {
-                            _logger.LogError(ex, $"Error importing TV show {show.Name}", ex.Message);
-                        }
+
+                        scope.Complete();
                     }
-                    scope.Complete(); // Transaction completed = save all changes for that batch to the db.
+
+                    await Task.Delay(100); // Optional: avoid rate limits or DB load
                 }
-                // Add batchSize(500) to the currentIndex
-                currentIndex += batchSize;
-                // 100ms - to avoid overwhelming system, might not be needed.
-                await Task.Delay(100); 
             }
-			return allTvShows;
         }
 
         public ImportDecision ShouldRunImport()
         {
-            var allTvShowsContentNode = _contentService.GetRootContent().FirstOrDefault(c => c.ContentType.Alias == "tvShows");
+            var allTvShowsContentNode = _contentService.GetRootContent().FirstOrDefault(c => c.ContentType.Alias == TvShowsContentTypeAlias);
 
             if (allTvShowsContentNode == null)
             {

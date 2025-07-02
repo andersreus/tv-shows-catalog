@@ -9,11 +9,10 @@ namespace TvShowsCatalog.Web.UI
     {
         private readonly IImportContentService _importContentService;
         private readonly ILogger<ContentImportFromMaze> _logger;
-        // Run initial import 30 seconds after application startup. After that, once pr day.
         public TimeSpan Period { get => TimeSpan.FromDays(1); }
-        
-        TimeSpan Delay = TimeSpan.FromSeconds(30);
+        private readonly TimeSpan Delay = TimeSpan.FromSeconds(30);
 
+        // No-op (no operation = not used in this implementation) but it's required by the interface.
         public event EventHandler PeriodChanged { add { } remove { } }
 
         public ContentImportFromMaze(IImportContentService importContentService, ILogger<ContentImportFromMaze> logger)
@@ -35,11 +34,7 @@ namespace TvShowsCatalog.Web.UI
                 if (importDecision.ShouldRunImport)
                 {
                     _logger.LogInformation("Running tvshow import for parent node with id {RootId}", importDecision.AllTvShowsContentNodeId);
-                    
-                    // Current amount is 85135 (2 june 2025)
-                    var importedItems = await _importContentService.ImportContentAsync(importDecision.AllTvShowsContentNodeId,500);
-
-                    _logger.LogInformation("Imported {Count} tvshows at {Time}", importedItems.Count(), DateTime.UtcNow);
+                    await _importContentService.ImportContentAsync(importDecision.AllTvShowsContentNodeId);
                 }
                 else
                 {
@@ -53,8 +48,7 @@ namespace TvShowsCatalog.Web.UI
             finally
             {
                 stopwatch.Stop();
-                // No ElapsedSeconds?
-                _logger.LogInformation("Tvshow import job completed in {ElapsedMilliseconds} ms at {EndTime}", stopwatch.ElapsedMilliseconds, DateTime.UtcNow);
+                _logger.LogInformation("Tvshow import job completed in {ElapsedTotalSeconds} ms at {EndTime}", stopwatch.Elapsed.TotalSeconds, DateTime.UtcNow);
             }
         }
     }

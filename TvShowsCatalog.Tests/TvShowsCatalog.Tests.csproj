@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 
@@ -11,11 +11,11 @@
 
   <ItemGroup>
     <PackageReference Include="coverlet.collector" Version="6.0.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.10.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageReference Include="NUnit" Version="3.14.0" />
     <PackageReference Include="NUnit.Analyzers" Version="3.9.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
-    <PackageReference Include="Umbraco.Cms.Tests.Integration" Version="14.1.1" />
+    <PackageReference Include="Umbraco.Cms.Tests.Integration" Version="15.4.2" />
   </ItemGroup>
 
   <ItemGroup>
@@ -26,14 +26,29 @@
     <Using Include="NUnit.Framework" />
   </ItemGroup>
 
+  <!-- /Users/andersreus/Code/My projects/tv-shows-catalog/TvShowsCatalog.Tests/bin/Debug/net9.0/appsettings.Tests.json -->
+  
+  <!--
   <ItemGroup>
-    <Content Update="C:\Users\reuse\.nuget\packages\umbraco.cms.tests.integration\14.1.1\contentFiles\any\net8.0\appsettings.Tests.json">
+    <Content Update="C:\Users\reuse\.nuget\packages\umbraco.cms.tests.integration\15.4.2\contentFiles\any\net9.0\appsettings.Tests.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Update="C:\Users\Umbraco\.nuget\packages\umbraco.cms.tests.integration\14.1.1\contentFiles\any\net8.0\appsettings.Tests.json">
+    <Content Update="C:\Users\Umbraco\.nuget\packages\umbraco.cms.tests.integration\15.4.2\contentFiles\any\net9.0\appsettings.Tests.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+  -->
+  
+  <!--
+  <ItemGroup>
+    <Content Update="C:/Users/reuse/.nuget/packages/umbraco.cms.tests.integration/15.4.2/contentFiles/any/net9.0/appsettings.Tests.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Update="C:/Users/Umbraco/.nuget/packages/umbraco.cms.tests.integration/15.4.2/contentFiles/any/net9.0/appsettings.Tests.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  -->
 
   <ItemGroup>
     <None Update="appsettings.Tests.Local.json">

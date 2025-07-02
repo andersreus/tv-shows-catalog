@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using TvShowsCatalog.Web.Models.ApiModels;
 using TvShowsCatalog.Web.Services;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Services;
@@ -59,36 +60,48 @@ namespace TvShowsCatalog.Tests
 		[Test]
 		public async Task Return_All_TvMazeModel_Objects()
 		{
-			var allShows = await _tvMazeService.GetAllAsync();
-			Assert.IsTrue(allShows.Any());
-		}
+			var allTvShows = new List<TvMazeModel>();
 
+			await foreach (var page in _tvMazeService.GetPageAsync())
+			{
+				allTvShows.AddRange(page);
+			}
+			Assert.IsTrue(allTvShows.Any());
+		}
+		
+		
 		[Test]
 		public async Task Create_A_Single_Media_In_Backoffice()
 		{
-			var allShows = await _tvMazeService.GetAllAsync();
+			await foreach (var page in _tvMazeService.GetPageAsync())
+			{
+				var firstTvShow = page.FirstOrDefault();
+				if (firstTvShow == null)
+				{
+					Assert.Fail("No TvShow found");
+				}
+				var media = await _importMediaService.ImportMediaAsync(firstTvShow);
+				var savedMedia = _mediaService.GetById(media.Id);
 
-			var media =  await _importMediaService.ImportMediaAsync(allShows.First());
-
-			var savedMedia = _mediaService.GetById(media.Id);
-
-			Assert.IsNotNull(savedMedia);
+				Assert.IsNotNull(savedMedia);
+				return;
+			}
 		}
 
-		//[Test]
-		//public void ImportBulkMedia_CreateAndSafeAllMediaInBackoffice()
-		//{
-		//	var allShows = _tvMazeService.GetAllAsync().GetAwaiter().GetResult();
+		// [Test]
+		// public void ImportBulkMedia_CreateAndSafeAllMediaInBackoffice()
+		// {
+		// 	var allShows = _tvMazeService.GetAllAsync().GetAwaiter().GetResult();
+		//
+		// 	var mediaFolder = _importMediaService.CreateMediaRootFolder();
+		//
+		// 	_importMediaService.ImportBulkMedia(allShows);
+		//
+		// 	int count = _mediaService.CountChildren(mediaFolder.Id);
+		//
+		// 	Assert.AreEqual(240, count);
+		// }
 
-		//	var mediaFolder = _importMediaService.CreateMediaRootFolder();
-
-		//	_importMediaService.ImportBulkMedia(allShows);
-
-		//	int count = _mediaService.CountChildren(mediaFolder.Id);
-
-		//	Assert.AreEqual(240, count);
-		//}
-		
 		[ Test]
 		public async Task Create_All_TvShows_As_Content_In_Backoffice()
         {
@@ -113,7 +126,7 @@ namespace TvShowsCatalog.Tests
 		        .Build();
 	        _contentTypeService.Save(genreElementType);
 	        var nestedBlockListDataType = await CreateBlockListDataType(genreElementType);
-	        
+
 	        var tvShowContentType = new ContentTypeBuilder()
 		        .WithAlias("tVShow")
 		        .WithName("TV Show")
@@ -143,10 +156,10 @@ namespace TvShowsCatalog.Tests
 
 	        var parentId = -1;
 	        var importAmount = 1000;
-	        var importedContent = await _importContentService.ImportContentAsync(parentId, importAmount);
+	        var importedContent = await _importContentService.ImportContentAsync(parentId);
 
 	        int count = _contentService.Count("tVShow");
-			
+
 	        Assert.AreEqual(importAmount, count);
         }
 
@@ -154,12 +167,12 @@ namespace TvShowsCatalog.Tests
 		public async Task Create_All_TvShows_As_Content_In_Backoffice_With_Variants()
 		{
 			//var defaultLang = _languageService.GetAllAsync();
-			
+
 			var language = new LanguageBuilder()
 				.WithCultureInfo("da-DK")
 				.Build();
 			await _languageService.CreateAsync(language, Constants.Security.SuperUserKey);
-			
+
 	        var genreElementType = new ContentTypeBuilder()
 		        .WithAlias("genre")
 		        .WithName("Genre")
@@ -184,7 +197,7 @@ namespace TvShowsCatalog.Tests
 		        .Build();
 	        _contentTypeService.Save(genreElementType);
 	        var nestedBlockListDataType = await CreateBlockListDataType(genreElementType);
-	        
+
             var tvShowContentType = new ContentTypeBuilder()
 				.WithAlias("tVShow")
 				.WithName("TV Show")
@@ -277,7 +290,7 @@ namespace TvShowsCatalog.Tests
 				Assert.IsNotNull(contentNode.TemplateId, $"Content node with name {contentNode.Name} does not have a template attached");
 			}
 		}
-		
+
 		// Help from source code -> BlockListElementLevelVariationTests.cs
 		private async Task<IDataType> CreateBlockListDataType(IContentType elementType)
 			=> await CreateBlockEditorDataType(
@@ -286,7 +299,7 @@ namespace TvShowsCatalog.Tests
 				{
 					new() { ContentElementTypeKey = elementType.Key, SettingsElementTypeKey = elementType.Key }
 				});
-		
+
 		protected async Task<IDataType> CreateBlockEditorDataType<T>(string propertyEditorAlias, T blocksConfiguration)
 		{
 			var dataType = new DataType(PropertyEditorCollection[propertyEditorAlias],
@@ -298,9 +311,10 @@ namespace TvShowsCatalog.Tests
 				ParentId = Constants.System.Root,
 				CreateDate = DateTime.UtcNow
 			};
-			
+
 			await DataTypeService.CreateAsync(dataType, Constants.Security.SuperUserKey);
 			return dataType;
 		}
+		*/
 	}
 }

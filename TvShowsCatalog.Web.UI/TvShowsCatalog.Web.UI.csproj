@@ -16,9 +16,9 @@
     <PackageReference Include="Twilio" Version="7.11.1" />
     <PackageReference Include="Umbraco.Cloud.Cms" Version="15.1.4" />
     <PackageReference Include="Umbraco.Cloud.StorageProviders.AzureBlob" Version="15.0.0" />
-    <PackageReference Include="Umbraco.Cms" Version="15.4.1" />
-    <PackageReference Include="Umbraco.Cms.Core" Version="15.4.1" />
-    <PackageReference Include="Umbraco.Cms.Tests.Integration" Version="15.4.1" />
+    <PackageReference Include="Umbraco.Cms" Version="15.4.2" />
+    <PackageReference Include="Umbraco.Cms.Core" Version="15.4.2" />
+    <PackageReference Include="Umbraco.Cms.Tests.Integration" Version="15.4.2" />
     <PackageReference Include="Umbraco.Deploy.Cloud" Version="15.1.0" />
     <PackageReference Include="Umbraco.Deploy.Contrib" Version="15.0.0" />
     <PackageReference Include="Umbraco.Forms" Version="15.1.2" />
