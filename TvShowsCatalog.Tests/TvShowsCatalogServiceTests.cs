@@ -1,3 +1,4 @@
+using Lucene.Net.Search;
 using Microsoft.Extensions.DependencyInjection;
 using TvShowsCatalog.Web.Models.ApiModels;
 using TvShowsCatalog.Web.Services;
@@ -28,6 +29,8 @@ namespace TvShowsCatalog.Tests
 		private ITemplateService _templateService;
 		private ILanguageService _languageService;
 		private ITranslationService _translationService;
+		private IContentEditingService _contentEditingService;
+		private IContentPublishingService _publishingService;
 		
 		private IConfigurationEditorJsonSerializer ConfigurationEditorJsonSerializer => GetRequiredService<IConfigurationEditorJsonSerializer>();
 		private IDataTypeService DataTypeService => GetRequiredService<IDataTypeService>();
@@ -47,6 +50,8 @@ namespace TvShowsCatalog.Tests
 			_templateService = GetRequiredService<ITemplateService>();
 			_languageService = GetRequiredService<ILanguageService>();
 			_translationService = GetRequiredService<ITranslationService>();
+			_contentEditingService = GetRequiredService<IContentEditingService>();
+			_publishingService = GetRequiredService<IContentPublishingService>();
 		}
 
 		protected override void CustomTestSetup(IUmbracoBuilder builder)
@@ -88,19 +93,19 @@ namespace TvShowsCatalog.Tests
 			}
 		}
 
-		// [Test]
-		// public void ImportBulkMedia_CreateAndSafeAllMediaInBackoffice()
-		// {
-		// 	var allShows = _tvMazeService.GetAllAsync().GetAwaiter().GetResult();
-		//
-		// 	var mediaFolder = _importMediaService.CreateMediaRootFolder();
-		//
-		// 	_importMediaService.ImportBulkMedia(allShows);
-		//
-		// 	int count = _mediaService.CountChildren(mediaFolder.Id);
-		//
-		// 	Assert.AreEqual(240, count);
-		// }
+		/*[Test]
+		public void ImportBulkMedia_CreateAndSafeAllMediaInBackoffice()
+		{
+			var allShows = _tvMazeService.GetAllAsync().GetAwaiter().GetResult();
+		
+			var mediaFolder = _importMediaService.CreateMediaRootFolder();
+		
+			_importMediaService.ImportBulkMedia(allShows);
+		
+			int count = _mediaService.CountChildren(mediaFolder.Id);
+		
+			Assert.AreEqual(240, count);
+		}*/
 
 		[ Test]
 		public async Task Create_All_TvShows_As_Content_In_Backoffice()
@@ -130,6 +135,7 @@ namespace TvShowsCatalog.Tests
 	        var tvShowContentType = new ContentTypeBuilder()
 		        .WithAlias("tVShow")
 		        .WithName("TV Show")
+		        .WithContentVariation(ContentVariation.Culture)
 		        .AddPropertyType()
 		        .WithAlias("genres")
 		        .WithName("Genres")
@@ -153,16 +159,82 @@ namespace TvShowsCatalog.Tests
 		        .Done()
 		        .Build();
 	        _contentTypeService.Save(tvShowContentType);
-
-	        var parentId = -1;
-	        var importAmount = 1000;
-	        var importedContent = await _importContentService.ImportContentAsync(parentId);
+	        
+	        await _importContentService.ImportContentAsync(Constants.System.RootKey);
 
 	        int count = _contentService.Count("tVShow");
 
-	        Assert.AreEqual(importAmount, count);
+	        Assert.Greater(count, 0);
         }
+		
+		[Test]
+		public async Task Create_First_Batch_Of_TvShows_As_Content_In_Backoffice()
+        {
+	        var language = new LanguageBuilder()
+		        .WithCultureInfo("da-DK")
+		        .Build();
+	        await _languageService.CreateAsync(language, Constants.Security.SuperUserKey);
+	        
+	        var genreElementType = new ContentTypeBuilder()
+		        .WithAlias("genre")
+		        .WithName("Genre")
+		        .WithContentVariation(ContentVariation.Culture)
+		        .WithIsElement(true)
+		        .AddPropertyType()
+		        .WithAlias("indexNumber")
+		        .WithName("Index Number")
+		        .WithDataTypeId(Constants.DataTypes.Textbox)
+		        .WithPropertyEditorAlias(Constants.PropertyEditors.Aliases.TextBox)
+		        .WithValueStorageType(ValueStorageType.Nvarchar)
+		        .Done()
+		        .AddPropertyType()
+		        .WithAlias("title")
+		        .WithName("Title")
+		        .WithDataTypeId(Constants.DataTypes.Textbox)
+		        .WithPropertyEditorAlias(Constants.PropertyEditors.Aliases.TextBox)
+		        .WithValueStorageType(ValueStorageType.Nvarchar)
+		        .Done()
+		        .Build();
+	        _contentTypeService.Save(genreElementType);
+	        var nestedBlockListDataType = await CreateBlockListDataType(genreElementType);
 
+	        var tvShowContentType = new ContentTypeBuilder()
+		        .WithAlias("tVShow")
+		        .WithAllowAsRoot(true)
+		        .WithName("TV Show")
+		        .WithContentVariation(ContentVariation.Culture)
+		        .AddPropertyType()
+		        .WithAlias("genres")
+		        .WithName("Genres")
+		        .WithVariations(ContentVariation.Culture)
+		        .WithDataTypeId(nestedBlockListDataType.Id)
+		        .WithPropertyEditorAlias(Constants.PropertyEditors.Aliases.BlockList)
+		        .WithValueStorageType(ValueStorageType.Ntext)
+		        .Done()
+		        .AddPropertyType()
+		        .WithAlias("showSummary")
+		        .WithName("Show Summary")
+		        .WithDataTypeId(Constants.DataTypes.RichtextEditor)
+		        .WithPropertyEditorAlias(Constants.PropertyEditors.Aliases.RichText)
+		        .WithValueStorageType(ValueStorageType.Ntext)
+		        .Done()
+		        .AddPropertyType()
+		        .WithAlias("showImage")
+		        .WithName("Show Image")
+		        // .WithDataTypeId(Constants.DataTypes.)
+		        .WithPropertyEditorAlias(Constants.PropertyEditors.Aliases.MediaPicker3)
+		        .WithValueStorageType(ValueStorageType.Nvarchar)
+		        .Done()
+		        .Build();
+	        _contentTypeService.Save(tvShowContentType);
+	        
+	        await _importContentService.ImportFirstBatchAsync(Constants.System.RootKey);
+
+	        int count = _contentService.Count("tVShow");
+
+	        Assert.Greater(count, 0);
+        }
+ 
 		[Test]
 		public async Task Create_All_TvShows_As_Content_In_Backoffice_With_Variants()
 		{
@@ -229,12 +301,11 @@ namespace TvShowsCatalog.Tests
 				.Build();
 			_contentTypeService.Save(tvShowContentType);
 
-			var parentId = -1;
-			var importAmount = 1000;
-            var importedContent = await _importContentService.ImportContentAsync(parentId, importAmount);
+			await _importContentService.ImportContentAsync(Constants.System.RootKey);
 
 			int count = _contentService.Count("tVShow");
-			Assert.AreEqual(importAmount, count);
+
+			Assert.Greater(count, 0);
         }
 
 		[Test]
@@ -277,10 +348,8 @@ namespace TvShowsCatalog.Tests
                 .Build();
 
 			_contentTypeService.Save(contentType);
-
-			var parentId = -1;
-			var importAmount = 1000;
-            var importedContent = _importContentService.ImportContentAsync(parentId, importAmount);
+			
+            var importedContent = _importContentService.ImportContentAsync(Constants.System.RootKey);
 
 			long totalRecords;
 			var contentNodes = _contentService.GetPagedChildren(-1, 0, int.MaxValue, out totalRecords);
@@ -315,6 +384,6 @@ namespace TvShowsCatalog.Tests
 			await DataTypeService.CreateAsync(dataType, Constants.Security.SuperUserKey);
 			return dataType;
 		}
-		*/
+		
 	}
 }

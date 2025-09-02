@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Reflection.Metadata;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.FileProviders;
@@ -9,6 +10,7 @@ using TvShowsCatalog.Web.Models.CoreModels;
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Models.Blocks;
+using Umbraco.Cms.Core.Models.ContentEditing;
 using Umbraco.Cms.Core.Scoping;
 using Umbraco.Cms.Core.Serialization;
 using Umbraco.Cms.Core.Services;
@@ -33,6 +35,7 @@ namespace TvShowsCatalog.Web.Services
         private const string GenreContentTypeAlias = "genre";
         private const string TvShowSummaryPropertyAlias = "showSummary";
         private const string TvShowImagePropertyAlias = "showImage";
+        private const string TvShowGenrePropertyAlias = "genres";
 
         public ImportContentService(
             IContentService contentService, 
@@ -58,70 +61,123 @@ namespace TvShowsCatalog.Web.Services
             _contentPublishingService = contentPublishingService;
         }
         
-        public async Task CreateContent(TvMazeModel tvshow, IMedia media, int allTvShowsContentNodeId, string[] cultures, IContentType tvShowContentType)
-		{
-			var tvShowNode = _contentService.Create(tvshow.Name, allTvShowsContentNodeId, TvShowContentTypeAlias);
-			tvShowNode.SetValue(TvShowSummaryPropertyAlias, tvshow.Summary ?? "No summary for this TV show");
-
-            if (media is null)
+        public async Task CreateContent(TvMazeModel tvshow, IMedia media, Guid? allTvShowsContentNodeKey, string[] cultures, IContentType tvShowContentType)
+        {
+            if (tvshow == null)
             {
-                _logger.LogWarning($"Could not find a image for this TV show: {tvshow.Name}");
-                tvShowNode.SetValue(TvShowImagePropertyAlias, null);
+                return;
             }
-            tvShowNode.SetValue(TvShowImagePropertyAlias, media.GetUdi().ToString());
-            
+
+            var listOfProperties = new List<PropertyValueModel>();
+            try
+            {
+                listOfProperties.Add(new PropertyValueModel
+                {
+                    Alias = TvShowSummaryPropertyAlias,
+                    Value = !string.IsNullOrEmpty(tvshow.Summary) ? tvshow.Summary : "No summary available"
+                });
+                listOfProperties.Add(new PropertyValueModel
+                {
+                    Alias = TvShowImagePropertyAlias,
+                    Value = media != null ? media.GetUdi().ToString() : string.Empty
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error adding properties for TV show {TvShowName}. Error: {Message}", tvshow.Name, ex.Message);
+            }
+
+            var listOfVariants = new List<VariantModel>();
             IContentType? elementContentType = _contentTypeService.Get(GenreContentTypeAlias);
 
             foreach (var culture in cultures)
             {
-                var elementData = new List<BlockItemData>();
-                var layoutItems = new List<IBlockLayoutItem>();
-                var isDefaultCulture = string.Equals(culture, "en-US", StringComparison.OrdinalIgnoreCase);
+                try
+                {
+                    var currentVariant = new VariantModel
+                    {
+                        Culture = culture,
+                        Name = tvshow.Name
+                    };
+                    listOfVariants.Add(currentVariant);
                 
-                for (int index = 0; index < tvshow.Genres.Count(); index++)
-                {
-                    var genre = tvshow.Genres[index];
-                    var variantGenreTitle = isDefaultCulture ? genre : _translationService.GetTranslation(culture,genre);
-                    var contentUdi = new GuidUdi(Constants.UdiEntityType.Element, Guid.NewGuid());
-                    elementData.Add(new(contentUdi, elementContentType.Key, elementContentType.Alias)
+                    var elementData = new List<BlockItemData>();
+                    var layoutItems = new List<IBlockLayoutItem>();
+                    var isDefaultCulture = string.Equals(culture, "en-US", StringComparison.OrdinalIgnoreCase);
+
+                    if (tvshow.Genres != null)
                     {
-                        RawPropertyValues = new Dictionary<string, object?>
+                        for (int index = 0; index < tvshow.Genres.Count(); index++)
                         {
-                            {"title", variantGenreTitle},
-                            {"indexNumber", index.ToString()}
+                            var genre = tvshow.Genres[index];
+                            var variantGenreTitle = isDefaultCulture ? genre : _translationService.GetTranslation(culture,genre);
+                            var contentUdi = new GuidUdi(Constants.UdiEntityType.Element, Guid.NewGuid());
+                            elementData.Add(new(contentUdi, elementContentType.Key, elementContentType.Alias)
+                            {
+                                RawPropertyValues = new Dictionary<string, object?>
+                                {
+                                    {"title", variantGenreTitle},
+                                    {"indexNumber", index.ToString()}
+                                }
+                            });
+
+                            layoutItems.Add(new BlockListLayoutItem
+                            {
+                                ContentUdi = contentUdi
+                            });
                         }
-                    });
+                    }
+                    var blockListValue = new BlockListValue
+                    {
+                        Layout = new Dictionary<string, IEnumerable<IBlockLayoutItem>>
+                        {
+                            {Constants.PropertyEditors.Aliases.BlockList, layoutItems}
+                        },
+                        ContentData = elementData
+                    };
                     
-                    layoutItems.Add(new BlockListLayoutItem
+                    var propertyValue = _serializer.Serialize(blockListValue);
+                    var blockValue = new PropertyValueModel
                     {
-                        ContentUdi = contentUdi
-                    });
+                        Alias = TvShowGenrePropertyAlias,
+                        Value = propertyValue,
+                        Culture = culture
+                    };
+                    listOfProperties.Add(blockValue);
                 }
-
-                var blockListValue = new BlockListValue
+                catch (Exception ex)
                 {
-                    Layout = new Dictionary<string, IEnumerable<IBlockLayoutItem>>
-                    {
-                        {Constants.PropertyEditors.Aliases.BlockList, layoutItems}
-                    },
-                    ContentData = elementData
-                };
-                var propertyValue = _serializer.Serialize(blockListValue);
-                tvShowNode.SetValue("genres", propertyValue, culture);
+                    _logger.LogError(ex, "Error adding variant for TV show {TvShowName} in culture {Culture}. Error: {Message}", tvshow.Name, culture, ex.Message);
+                }
             }
 
-            foreach (var culture in cultures)
+            var documentKey = Guid.NewGuid();
+            var createModel = new ContentCreateModel
             {
-                tvShowNode.SetCultureName(tvshow.Name,culture);
-            }
+                Key = documentKey,
+                ContentTypeKey = tvShowContentType.Key,
+                ParentKey = allTvShowsContentNodeKey,
+                Properties = listOfProperties,
+                Variants = listOfVariants
+            };
             
-            // Use IContentEditingService to save the content
-            // Use IContentPublishingService to publish the content
-            _contentService.Save(tvShowNode);
-			_contentService.Publish(tvShowNode, cultures);
-		}
+            var content = await _contentEditingService.CreateAsync(createModel, Constants.Security.SuperUserKey);
 
-        public async Task ImportContentAsync(int parentKey)
+            if (content.Success is false)
+            {
+                _logger.LogCritical("Could not create content for TV show {TvShowName}. Status: {Errors}", tvshow.Name, content.Status);
+            }
+
+            await _contentPublishingService.PublishAsync(
+                content.Result.Content.Key,
+                [
+                    new() { Culture = cultures[0] },
+                    new() { Culture = cultures[1] },
+                ],
+                Constants.Security.SuperUserKey);
+        }
+
+        public async Task ImportContentAsync(Guid? allTvShowsContentNodeKey)
         {
             const int batchSize = 500;
             var cultures = new[] { "en-US", "da-DK" };
@@ -136,7 +192,7 @@ namespace TvShowsCatalog.Web.Services
                         foreach (var show in batch)
                         {
                             var media = await _importMediaService.ImportMediaAsync(show);
-                            CreateContent(show, media, parentKey, cultures, tvShowContentType);
+                            await CreateContent(show, media, allTvShowsContentNodeKey, cultures, tvShowContentType);
                             // Run in debug mode, check if any exceptions are thrown and then add them in the catch block
                             /*try
                              {
@@ -152,7 +208,7 @@ namespace TvShowsCatalog.Web.Services
                         scope.Complete();
                     }
 
-                    await Task.Delay(100); // Optional: avoid rate limits or DB load
+                    await Task.Delay(100);
                 }
             }
         }
@@ -165,16 +221,38 @@ namespace TvShowsCatalog.Web.Services
             {
                 throw new Exception("TV Shows root content node was not found");
             }
-
+            
             var allTvShowsContentNodeId = allTvShowsContentNode.Id;
+            var allTvShowsContentNodeKey = allTvShowsContentNode.Key;
             
             bool isThereContent = _contentService.HasChildren(allTvShowsContentNodeId);
-
+            
             return new ImportDecision
             {
                 ShouldRunImport = !isThereContent,
-                AllTvShowsContentNodeId = allTvShowsContentNodeId
+                AllTvShowsContentNodeKey = allTvShowsContentNodeKey
             };
+        }
+
+        public async Task ImportFirstBatchAsync(Guid? allTvShowsContentNodeKey)
+        {
+            var cultures = new[] { "en-US", "da-DK" };
+            var tvShowContentType = _contentTypeService.Get(TvShowContentTypeAlias);
+
+            await foreach (var page in _tvMazeService.GetPageAsync())
+            {
+                var firstBatch = page.Take(100);
+                using (ICoreScope scope = _coreScopeProvider.CreateCoreScope(autoComplete: true))
+                {
+                    foreach (var show in firstBatch)
+                    {
+                        var media = await _importMediaService.ImportMediaAsync(show);
+                        await CreateContent(show, media, allTvShowsContentNodeKey, cultures, tvShowContentType);
+                    }
+                    scope.Complete();
+                }
+                break;
+            }
         }
     }
 }

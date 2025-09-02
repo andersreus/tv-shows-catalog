@@ -9,7 +9,6 @@ namespace TvShowsCatalog.Web.Services
 {
     public interface ITvMazeService
     {
-        // Task<IEnumerable<TvMazeModel>> GetAllAsync();
         IAsyncEnumerable<List<TvMazeModel>> GetPageAsync();
     }
 }
