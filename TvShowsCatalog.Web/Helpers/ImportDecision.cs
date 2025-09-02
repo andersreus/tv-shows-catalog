@@ -9,6 +9,6 @@ namespace TvShowsCatalog.Web.Helpers
     public class ImportDecision
     {
         public bool ShouldRunImport { get; set; }
-        public int AllTvShowsContentNodeId { get; set; }
+        public Guid AllTvShowsContentNodeKey { get; set; }
     }
 }

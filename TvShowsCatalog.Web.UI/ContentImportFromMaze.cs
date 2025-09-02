@@ -10,7 +10,7 @@ namespace TvShowsCatalog.Web.UI
         private readonly IImportContentService _importContentService;
         private readonly ILogger<ContentImportFromMaze> _logger;
         public TimeSpan Period { get => TimeSpan.FromDays(1); }
-        private readonly TimeSpan Delay = TimeSpan.FromSeconds(30);
+        private readonly TimeSpan Delay = TimeSpan.FromSeconds(20);
 
         // No-op (no operation = not used in this implementation) but it's required by the interface.
         public event EventHandler PeriodChanged { add { } remove { } }
@@ -33,12 +33,12 @@ namespace TvShowsCatalog.Web.UI
 
                 if (importDecision.ShouldRunImport)
                 {
-                    _logger.LogInformation("Running tvshow import for parent node with id {RootId}", importDecision.AllTvShowsContentNodeId);
-                    await _importContentService.ImportContentAsync(importDecision.AllTvShowsContentNodeId);
+                    _logger.LogInformation("Running tvshow import for parent node with id {RootId}", importDecision.AllTvShowsContentNodeKey);
+                    await _importContentService.ImportContentAsync(importDecision.AllTvShowsContentNodeKey);
                 }
                 else
                 {
-                    _logger.LogInformation("TvShows already exists under parent node with id {RootId}. Import was cancelled at {EndTime}", importDecision.AllTvShowsContentNodeId, DateTime.UtcNow);
+                    _logger.LogInformation("TvShows already exists under parent node with id {RootId}. Import was cancelled at {EndTime}", importDecision.AllTvShowsContentNodeKey, DateTime.UtcNow);
                 }
             }
             catch (Exception ex)
